@@ -1,0 +1,16 @@
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
+#include <reactor_utils.hpp>
+
+/* Product version */
+#define PRODUCT_VERSION @PROJECT_VERSION@
+
+/* Build date */
+#define BUILD_DATE @CURR_DATE@
+#define BUILD_YEAR @CURR_YEAR@
+
+/* Source Root */
+#define PROJECT_SOURCE_ROOT_DIR "@PROJECT_SOURCE_ROOT_DIR@"
+
+#endif // CONFIG_HPP

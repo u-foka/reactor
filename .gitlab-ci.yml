@@ -1,0 +1,55 @@
+stages:
+  - build
+  - test
+
+image: registry.iwstudio.hu/iws/ubuild:latest
+
+variables:
+    CC: clang
+    CXX: clang++
+    DOCKER_DRIVER: overlay2
+
+build:
+  stage: build
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - build/bin
+      - include
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+
+debug-build:
+  stage: build
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - debug-build/bin
+      - include
+  script:
+    - mkdir debug-build
+    - cd debug-build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test:
+  stage: test
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - build/ccov
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    - cmake --build . --target ccov
+    - cmake --build . --target ccov-report
