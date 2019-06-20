@@ -5,6 +5,9 @@ find_package(Benchmark REQUIRED)
 file(GLOB_RECURSE TEST_SOURCES *.cpp)
 file(GLOB_RECURSE TEST_HEADERS *.hpp)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 include_directories("${BENCHMARK_INCLUDE_DIR}" "../../src")
 
 foreach(item ${SOURCES})
@@ -16,4 +19,4 @@ endforeach()
 set(TEST_NAME ${PROJECT_NAME}_reactor_benchmark)
 
 add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS})
-target_link_libraries(${TEST_NAME} ${BENCHMARK_LIBRARY})
+target_link_libraries(${TEST_NAME} PRIVATE Threads::Threads ${BENCHMARK_LIBRARY})

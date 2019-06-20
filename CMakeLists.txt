@@ -69,11 +69,9 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(${ROOT_SOURCE_DIR})
 
 if(REACTOR_STATIC)
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+  add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 else(REACTOR_STATIC)
   add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
-
-  target_link_libraries(${PROJECT_NAME})
 endif(REACTOR_STATIC)
 
 if(NOT HAS_PARENT)

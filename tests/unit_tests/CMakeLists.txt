@@ -29,7 +29,7 @@ endforeach()
 set(TEST_NAME ${PROJECT_NAME}_test)
 
 add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS} "../../thirdparty/gtest/src/gtest-all.cc" "../../thirdparty/gmock/src/gmock-all.cc" "../../thirdparty/gmock/src/gmock_main.cc")
-target_link_libraries(${TEST_NAME} Threads::Threads)
+target_link_libraries(${TEST_NAME} PRIVATE Threads::Threads)
 target_code_coverage(${TEST_NAME} AUTO ALL EXCLUDE tests/* thirdparty/*)
 
 add_test(${TEST_NAME} ${COMMON_BUILD_BINARY_DIR}/${TEST_NAME})
