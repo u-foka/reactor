@@ -262,8 +262,8 @@ TEST_F(reactor, concurrent_get)
 {
     // Exacly the same object has to be received for each threads per run
 
-    constexpr int rounds = 100;
-    constexpr int threads = 100;
+    constexpr int rounds = 1000;
+    constexpr int threads = 10;
 
     inst->register_factory(std::string(), iws::reactor::prio_normal,
         std::unique_ptr<iws::reactor::factory_base>(new iws::reactor::factory<test<19>, test<19>, false>()));
@@ -403,6 +403,9 @@ TEST_F(reactor, addon_simple)
     auto addons = inst->get_addons<i_test::test_addon>();
     for (auto& [prio, addon] : addons)
     {
+        EXPECT_EQ(std::type_index(addon->get_type()), std::type_index(typeid(i_test::test_addon)));
+        EXPECT_EQ(std::type_index(addon->get_interface_type()), std::type_index(typeid(i_test)));
+
         addon->addon_func("testing");
     }
 }
@@ -424,11 +427,25 @@ TEST_F(reactor, addon_filter)
             return item.first != iws::reactor::prio_unittest;
         });
     }));
-    inst->register_addon_filter(std::string(), iws::reactor::prio_unittest, std::make_unique<iws::reactor::addon_filter<i_test::test_addon>>(addon_filter_mock));
+
+    auto filter = std::make_unique<iws::reactor::addon_filter<i_test::test_addon>>(addon_filter_mock);
+    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
+    EXPECT_EQ(std::type_index(filter->get_interface_type()), std::type_index(typeid(i_test)));
+
+    inst->register_addon_filter(std::string(), iws::reactor::prio_unittest, std::move(filter));
     
     auto addons = inst->get_addons<i_test::test_addon>();
     for (auto& [prio, addon] : addons)
     {
         addon->addon_func("testing");
     }
+}
+
+TEST_F(reactor, factory_result)
+{
+    auto val = std::make_shared<test<27>>();
+    iws::reactor::factory_result obj(val);
+
+    EXPECT_EQ(obj.get<test<27>>().get(), val.get());
+    EXPECT_THROW(obj.get<test<0>>(), std::logic_error);
 }
