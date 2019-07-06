@@ -157,7 +157,15 @@ TEST_F(reactor, unregister)
         std::unique_ptr<iws::reactor::factory_base>(new iws::reactor::factory<i_test, test<5>, false>()));
     inst->register_factory(std::string(), iws::reactor::prio_unittest,
         std::unique_ptr<iws::reactor::factory_base>(new iws::reactor::factory<i_test, test<6>, false>()));
+
+    EXPECT_THROW(inst->unregister_factory(std::string(), iws::reactor::prio_override, typeid(i_test)), iws::reactor::type_not_registred_exception);
+    EXPECT_THROW(inst->unregister_factory(std::string(), iws::reactor::prio_unittest, typeid(test<6>)), iws::reactor::type_not_registred_exception);
+    EXPECT_THROW(inst->unregister_factory("no_inst", iws::reactor::prio_unittest, typeid(i_test)), iws::reactor::type_not_registred_exception);
+
+    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
+
     inst->unregister_factory(std::string(), iws::reactor::prio_unittest, typeid(i_test));
+    inst->reset_objects(); // So i_test will be recreated with the effective factory on the next get()
 
     EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
 }
