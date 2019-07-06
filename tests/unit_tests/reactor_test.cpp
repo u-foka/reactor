@@ -449,3 +449,21 @@ TEST_F(reactor, factory_result)
     EXPECT_EQ(obj.get<test<27>>().get(), val.get());
     EXPECT_THROW(obj.get<test<0>>(), std::logic_error);
 }
+
+TEST_F(reactor, type_not_registred_exception_what)
+{
+    const std::string what("WHAT?!");
+    const iws::reactor::type_not_registred_exception ex(typeid(reactor), what);
+
+    EXPECT_GE(strlen(ex.what()), 0ul);
+    EXPECT_GE(strlen(ex.what()), 0ul); // Also check cached
+}
+
+TEST_F(reactor, type_already_registred_exception_what)
+{
+const std::string what("WHAT?!");
+    const iws::reactor::type_already_registred_exception ex(typeid(reactor), what, iws::reactor::prio_normal);
+
+    EXPECT_GE(strlen(ex.what()), 0ul);
+    EXPECT_GE(strlen(ex.what()), 0ul); // Also check cached
+}
