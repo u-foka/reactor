@@ -3,7 +3,6 @@
 
 #include <atomic>
 #include <exception>
-#include <vector>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -13,6 +12,7 @@
 #include <typeindex>
 #include <typeinfo>
 #include <utility>
+#include <vector>
 
 #include "callback_holder.hpp"
 #include "reactor_utils.hpp"
@@ -528,7 +528,8 @@ std::shared_ptr<T> reactor::get_ptr(T &obj)
    std::unique_lock<std::recursive_mutex> object_list_lock(_object_list_mutex);
 
    // Try to find an existing instance
-   auto oi = reactor_utils::find_if(_object_list, [&obj](const std::shared_ptr<void> &item) { return &obj == item.get(); });
+   auto oi =
+         reactor_utils::find_if(_object_list, [&obj](const std::shared_ptr<void> &item) { return &obj == item.get(); });
 
    if (oi != _object_list.end())
    {
@@ -700,14 +701,16 @@ reactor::factory_wrapper_registrator<I, unregister>::~factory_wrapper_registrato
 
 template<typename T>
 reactor::contract<T>::contract(const std::string &instance)
-      : _index(typeid(T), instance), _r_inst(&r)
+      : _index(typeid(T), instance)
+      , _r_inst(&r)
 {
    _r_inst->register_contract(this);
 }
 
 template<typename T>
 reactor::contract<T>::contract(reactor *r_inst, const std::string &instance)
-      : _index(typeid(T), instance), _r_inst(r_inst)
+      : _index(typeid(T), instance)
+      , _r_inst(r_inst)
 {
    _r_inst->register_contract(this);
 }
@@ -759,7 +762,8 @@ reactor::addon_registrator<T, unregister>::addon_registrator(reactor::priorities
 }
 
 template<typename T, bool unregister>
-reactor::addon_registrator<T, unregister>::addon_registrator(const std::string &instance, reactor::priorities priority, addon<T> &&inst)
+reactor::addon_registrator<T, unregister>::addon_registrator(
+      const std::string &instance, reactor::priorities priority, addon<T> &&inst)
       : _name(instance)
       , _priority(priority)
 {
@@ -772,7 +776,7 @@ reactor::addon_registrator<T, unregister>::~addon_registrator()
    if (unregister)
    {
       // TODO: Finish addon managmement :)
-      //r.unregister_addon(_name, _priority, typeid(I));
+      // r.unregister_addon(_name, _priority, typeid(I));
    }
 }
 
