@@ -88,6 +88,17 @@ struct reactor : public ::testing::Test
           return _index;
        }
     };
+
+    class shutdown_checker
+    {
+    public:
+        iws::callback_holder<> sig_dtor;
+
+        virtual ~shutdown_checker()
+        {
+            sig_dtor();
+        }
+    };
 };
 
 TEST_F(reactor, instantiate)
@@ -469,9 +480,24 @@ TEST_F(reactor, type_not_registred_exception_what)
 
 TEST_F(reactor, type_already_registred_exception_what)
 {
-const std::string what("WHAT?!");
+    const std::string what("WHAT?!");
     const iws::reactor::type_already_registred_exception ex(typeid(reactor), what, iws::reactor::prio_normal);
 
     EXPECT_GE(strlen(ex.what()), 0ul);
     EXPECT_GE(strlen(ex.what()), 0ul); // Also check cached
+}
+
+TEST_F(reactor, is_shutting_down)
+{
+    EXPECT_EQ(inst->is_shutting_down(), false);
+
+    inst->register_factory(std::string(), iws::reactor::prio_normal,
+        std::unique_ptr<iws::reactor::factory_base>(new iws::reactor::factory<shutdown_checker, shutdown_checker, false>()));
+
+    inst->get(test_contract<shutdown_checker>()).sig_dtor.connect([&] {
+        EXPECT_EQ(inst->is_shutting_down(), true);
+    });
+    
+    delete inst;
+    inst = nullptr;
 }
