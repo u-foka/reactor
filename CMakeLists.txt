@@ -20,7 +20,14 @@ else()
 set(REACTOR_BUILD_MODE "Standalone")
 endif()
 
-message("Configuring ${PROJECT_NAME} version ${PROJECT_VERSION} in ${REACTOR_BUILD_MODE} mode as ${CMAKE_BUILD_TYPE}")
+option(REACTOR_STATIC "Build static library" OFF)
+if (REACTOR_STATIC)
+  set(REACTOR_LIBRARY_TYPE "Static")
+else()
+  set(REACTOR_LIBRARY_TYPE "Dynamic")
+endif()
+
+message("Configuring ${PROJECT_NAME} version ${PROJECT_VERSION} in ${REACTOR_BUILD_MODE} mode as ${CMAKE_BUILD_TYPE} ${REACTOR_LIBRARY_TYPE} library")
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(PROJECT_SOURCE_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
