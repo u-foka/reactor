@@ -109,7 +109,7 @@ TEST_F(reactor, missing)
    inst->register_factory(std::string(), iws::reactor::prio_normal,
          std::unique_ptr<iws::reactor::factory_base>(new iws::reactor::factory<test<1>, test<1>, false>()));
 
-   EXPECT_THROW(inst->get(test_contract<test<-1>>()).get_id(), iws::reactor::type_not_registred_exception);
+   EXPECT_THROW(inst->get(test_contract<test<-1>>()).get_id(), iws::reactor::factory_not_registred_exception);
 }
 
 TEST_F(reactor, interface)
@@ -160,11 +160,11 @@ TEST_F(reactor, unregister)
          std::unique_ptr<iws::reactor::factory_base>(new iws::reactor::factory<i_test, test<6>, false>()));
 
    EXPECT_THROW(inst->unregister_factory(std::string(), iws::reactor::prio_override, typeid(i_test)),
-         iws::reactor::type_not_registred_exception);
+         iws::reactor::factory_not_registred_exception);
    EXPECT_THROW(inst->unregister_factory(std::string(), iws::reactor::prio_unittest, typeid(test<6>)),
-         iws::reactor::type_not_registred_exception);
+         iws::reactor::factory_not_registred_exception);
    EXPECT_THROW(inst->unregister_factory("no_inst", iws::reactor::prio_unittest, typeid(i_test)),
-         iws::reactor::type_not_registred_exception);
+         iws::reactor::factory_not_registred_exception);
 
    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
 
@@ -411,6 +411,7 @@ TEST_F(reactor, addon_simple)
          std::make_unique<iws::reactor::addon<i_test::test_addon>>(std::move(addon_fun)));
 
    auto addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 1ul);
    for (auto &[prio, addon] : addons)
    {
       EXPECT_EQ(std::type_index(addon->get_type()), std::type_index(typeid(i_test::test_addon)));
@@ -418,6 +419,19 @@ TEST_F(reactor, addon_simple)
 
       addon->addon_func("testing");
    }
+
+   EXPECT_THROW(inst->unregister_addon(std::string(), iws::reactor::prio_override, typeid(i_test::test_addon)),
+         iws::reactor::addon_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory(std::string(), iws::reactor::prio_normal, typeid(std::string)),
+         iws::reactor::factory_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory("no_inst", iws::reactor::prio_normal, typeid(i_test::test_addon)),
+         iws::reactor::factory_not_registred_exception);
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
+
+   inst->unregister_addon(std::string(), iws::reactor::prio_normal, typeid(i_test::test_addon));
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
 }
 
 TEST_F(reactor, addon_filter)
@@ -434,9 +448,11 @@ TEST_F(reactor, addon_filter)
 
    mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
    typedef typename iws::reactor::addon_func_map<i_test::test_addon>::type addon_map_type;
-   EXPECT_CALL(addon_filter_mock, mock_func(_)).WillOnce(Invoke([](addon_map_type &addons) {
+   EXPECT_CALL(addon_filter_mock, mock_func(_)).WillRepeatedly(Invoke([](addon_map_type &addons) {
       iws::reactor_utils::erase_if(addons, [](auto &item) { return item.first != iws::reactor::prio_unittest; });
    }));
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 
    auto filter = std::make_unique<iws::reactor::addon_filter<i_test::test_addon>>(addon_filter_mock);
    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
@@ -445,10 +461,24 @@ TEST_F(reactor, addon_filter)
    inst->register_addon_filter(std::string(), iws::reactor::prio_unittest, std::move(filter));
 
    auto addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 1ul);
    for (auto &[prio, addon] : addons)
    {
       addon->addon_func("testing");
    }
+
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), iws::reactor::prio_override, typeid(i_test::test_addon)),
+         iws::reactor::addon_filter_not_registred_exception);
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), iws::reactor::prio_unittest, typeid(std::string)),
+         iws::reactor::addon_filter_not_registred_exception);
+   EXPECT_THROW(inst->unregister_addon_filter("no_inst", iws::reactor::prio_unittest, typeid(i_test::test_addon)),
+         iws::reactor::addon_filter_not_registred_exception);
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
+
+   inst->unregister_addon_filter(std::string(), iws::reactor::prio_unittest, typeid(i_test::test_addon));
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 }
 
 TEST_F(reactor, factory_result)
@@ -460,10 +490,10 @@ TEST_F(reactor, factory_result)
    EXPECT_THROW(obj.get<test<0>>(), std::logic_error);
 }
 
-TEST_F(reactor, type_not_registred_exception_what)
+TEST_F(reactor, factory_not_registred_exception_what)
 {
    const std::string what("WHAT?!");
-   const iws::reactor::type_not_registred_exception ex(typeid(reactor), what);
+   const iws::reactor::factory_not_registred_exception ex(typeid(reactor), what);
 
    EXPECT_GE(strlen(ex.what()), 0ul);
    EXPECT_GE(strlen(ex.what()), 0ul); // Also check cached

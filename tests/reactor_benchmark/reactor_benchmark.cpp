@@ -14,7 +14,7 @@ static void BM_Reactor_CreateObj(benchmark::State &state)
    {
       iws::r.reset_objects();
       i_empty &obj = iws::r.get(contract);
-      (void)(obj);
+      benchmark::DoNotOptimize(obj);
    }
 }
 BENCHMARK(BM_Reactor_CreateObj);
@@ -28,10 +28,10 @@ static void BM_Reactor_CreateAndAccess(benchmark::State &state)
    {
       iws::r.reset_objects();
       i_empty &created = iws::r.get(contract);
-      (void)(created);
+      benchmark::DoNotOptimize(created);
       
       i_empty &obj = iws::r.get(contract);
-      (void)(obj);
+      benchmark::DoNotOptimize(obj);
    }
 }
 BENCHMARK(BM_Reactor_CreateAndAccess);
@@ -45,10 +45,10 @@ static void BM_Reactor_CreateAndAccessHolder(benchmark::State &state)
    {
       iws::r.reset_objects();
       i_empty &created = iws::r.get(contract);
-      (void)(created);
+      benchmark::DoNotOptimize(created);
       
       std::shared_ptr<i_empty> obj = iws::r.get_ptr(iws::r.get(contract));
-      (void)(obj);
+      benchmark::DoNotOptimize(obj);
    }
 }
 BENCHMARK(BM_Reactor_CreateAndAccessHolder);

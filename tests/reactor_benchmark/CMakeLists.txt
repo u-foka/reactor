@@ -16,7 +16,7 @@ foreach(item ${SOURCES})
   endif()
 endforeach()
 
-set(TEST_NAME ${PROJECT_NAME}_reactor_benchmark)
+set(TEST_NAME ${PROJECT_NAME}_benchmark)
 
 add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS})
 target_link_libraries(${TEST_NAME} PRIVATE Threads::Threads ${BENCHMARK_LIBRARY})

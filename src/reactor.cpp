@@ -1,7 +1,5 @@
 #include "reactor.hpp"
 
-#include <sstream>
-
 namespace iws {
 
 // Memory for the reactor object
@@ -74,7 +72,7 @@ void reactor::register_factory(
 
 void reactor::unregister_factory(const std::string &instance, priorities priority, const std::type_info &type)
 {
-   std::unique_lock<std::shared_mutex> factory_writelock(_factory_mutex);
+   std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
 
    const index id(type, instance);
 
@@ -82,7 +80,7 @@ void reactor::unregister_factory(const std::string &instance, priorities priorit
    if (it == _factory_map.end())
    {
       // No factory found for the given parameters
-      throw type_not_registred_exception(type, instance);
+      throw factory_not_registred_exception(type, instance);
    }
 
    auto &prio_map = it->second;
@@ -91,7 +89,7 @@ void reactor::unregister_factory(const std::string &instance, priorities priorit
    if (it_prio == prio_map.end())
    {
       // No factory found for the given parameters
-      throw type_not_registred_exception(type, instance);
+      throw factory_not_registred_exception(type, instance);
    }
 
    // Found the factory in prio_map, remove it!
@@ -112,6 +110,38 @@ void reactor::register_addon(const std::string &instance, priorities priority, s
    _addon_map[id].insert({priority, std::move(addon)});
 }
 
+void reactor::unregister_addon(const std::string &instance, priorities priority, const std::type_info &type)
+{
+   std::unique_lock<std::shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_map.find(id);
+   if (it == _addon_map.end())
+   {
+      // No addon found for the given parameters
+      throw addon_not_registred_exception(type, instance);
+   }
+
+   auto &prio_map = it->second;
+
+   auto it_prio = prio_map.find(priority);
+   if (it_prio == prio_map.end())
+   {
+      // No addon found for the given parameters
+      throw addon_not_registred_exception(type, instance);
+   }
+
+   // Found the addon in prio_map, remove it!
+   prio_map.erase(it_prio);
+
+   if (prio_map.empty())
+   {
+      // The prio_map is empty, let's remove the item from the addon_map too
+      _addon_map.erase(it);
+   }
+}
+
 void reactor::register_addon_filter(
       const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter)
 {
@@ -119,6 +149,38 @@ void reactor::register_addon_filter(
 
    const index id(filter->get_type(), instance);
    _addon_filter_map[id].insert({priority, std::move(filter)});
+}
+
+void reactor::unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type)
+{
+   std::unique_lock<std::shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_filter_map.find(id);
+   if (it == _addon_filter_map.end())
+   {
+      // No addon_filter found for the given parameters
+      throw addon_filter_not_registred_exception(type, instance);
+   }
+
+   auto &prio_map = it->second;
+
+   auto it_prio = prio_map.find(priority);
+   if (it_prio == prio_map.end())
+   {
+      // No addon_filter found for the given parameters
+      throw addon_filter_not_registred_exception(type, instance);
+   }
+
+   // Found the addon_filter in prio_map, remove it!
+   prio_map.erase(it_prio);
+
+   if (prio_map.empty())
+   {
+      // The prio_map is empty, let's remove the item from the addon_filter_map too
+      _addon_filter_map.erase(it);
+   }
 }
 
 void reactor::reset_objects()
@@ -208,21 +270,6 @@ void reactor::unregister_contract(contract_base *cont)
    {
       _contract_list.erase(it);
    }
-}
-
-reactor::type_not_registred_exception::type_not_registred_exception(const std::type_info &type, const std::string &name)
-      : type(type)
-      , name(name)
-{
-}
-
-const char *reactor::type_not_registred_exception::what() const noexcept
-{
-   std::stringstream ss;
-   ss << "There is no factory with the given type or name registred: " << type.name() << ", '" << name << "'";
-   msg_buffer = ss.str();
-
-   return msg_buffer.c_str();
 }
 
 reactor::type_already_registred_exception::type_already_registred_exception(

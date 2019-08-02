@@ -7,6 +7,7 @@
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <typeindex>
@@ -265,10 +266,11 @@ class reactor
       const priorities _priority;
    };
 
-   class type_not_registred_exception : public std::exception
+   template<const char *const typ>
+   class not_registred_exception : public std::exception
    {
     public:
-      type_not_registred_exception(const std::type_info &type, const std::string &name);
+      not_registred_exception(const std::type_info &type, const std::string &name);
       virtual const char *what() const noexcept;
 
     private:
@@ -276,6 +278,15 @@ class reactor
       const std::string name;
       mutable std::string msg_buffer;
    };
+
+   static constexpr char factory_not_registred_exception_typ[] = "factory";
+   typedef not_registred_exception<factory_not_registred_exception_typ> factory_not_registred_exception;
+
+   static constexpr char addon_not_registred_exception_typ[] = "addon";
+   typedef not_registred_exception<addon_not_registred_exception_typ> addon_not_registred_exception;
+
+   static constexpr char addon_filter_not_registred_exception_typ[] = "addon filter";
+   typedef not_registred_exception<addon_filter_not_registred_exception_typ> addon_filter_not_registred_exception;
 
    class type_already_registred_exception : public std::exception
    {
@@ -392,9 +403,11 @@ class reactor
    void unregister_factory(const std::string &instance, priorities priority, const std::type_info &type);
 
    void register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon);
+   void unregister_addon(const std::string &instance, priorities priority, const std::type_info &type);
 
    void register_addon_filter(
          const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter);
+   void unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type);
 
    template<typename T>
    T &get(const typed_contract<T> &contract);
@@ -491,7 +504,7 @@ T &reactor::get(const typed_contract<T> &contract)
       if (fi == _factory_map.end())
       {
          // No factory found for the given parameters
-         throw type_not_registred_exception(t, id.second);
+         throw factory_not_registred_exception(t, id.second);
       }
    }
 
@@ -696,6 +709,27 @@ reactor::factory_wrapper_registrator<I, unregister>::~factory_wrapper_registrato
 }
 
 //
+// reactor::not_registred_exception
+//
+
+template<const char *const typ>
+reactor::not_registred_exception<typ>::not_registred_exception(const std::type_info &type, const std::string &name)
+      : type(type)
+      , name(name)
+{
+}
+
+template<const char *const typ>
+const char *reactor::not_registred_exception<typ>::what() const noexcept
+{
+   std::stringstream ss;
+   ss << "There is no " << typ << " with the given type or name registred: " << type.name() << ", '" << name << "'";
+   msg_buffer = ss.str();
+
+   return msg_buffer.c_str();
+}
+
+//
 // reactor::contract
 //
 
@@ -775,8 +809,7 @@ reactor::addon_registrator<T, unregister>::~addon_registrator()
 {
    if (unregister)
    {
-      // TODO: Finish addon managmement :)
-      // r.unregister_addon(_name, _priority, typeid(I));
+      r.unregister_addon(_name, _priority, typeid(T));
    }
 }
 
