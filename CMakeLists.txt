@@ -72,7 +72,6 @@ endif(UNIX)
 file(GLOB SOURCES "src/*.cpp" ${PLATFORM_SOURCES_PATTERN})
 file(GLOB HEADERS "src/*.hpp" "include/*.hpp" ${PLATFORM_HEADERS_PATTERN})
 
-include_directories(${Boost_INCLUDE_DIR})
 include_directories(${ROOT_SOURCE_DIR})
 
 if(REACTOR_STATIC)
