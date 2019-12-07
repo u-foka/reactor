@@ -1,7 +1,7 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <reactor_utils.hpp>
+#include <reactor/utils.hpp>
 
 /* Product version */
 #define PRODUCT_VERSION @PROJECT_VERSION@

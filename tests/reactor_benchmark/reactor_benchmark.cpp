@@ -1,6 +1,6 @@
 #include <benchmark/benchmark.h>
 
-#include "reactor.hpp"
+#include <reactor/reactor.hpp>
 
 class i_empty {};
 class empty : public i_empty {};

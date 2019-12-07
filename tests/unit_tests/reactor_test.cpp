@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#include "reactor.hpp"
+#include <reactor/reactor.hpp>
 
 using namespace std::chrono_literals;
 namespace sph = std::placeholders;
