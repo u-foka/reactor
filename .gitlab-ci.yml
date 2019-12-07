@@ -2,54 +2,126 @@ stages:
   - build
   - test
 
-image: registry.iwstudio.hu/iws/ubuild:latest
-
 variables:
     CC: clang
     CXX: clang++
     DOCKER_DRIVER: overlay2
 
-build:
+build-ubuntu:
   stage: build
   tags:
     - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
   artifacts:
     paths:
-      - build/bin
+      - build-ubuntu/bin
       - include
   script:
-    - mkdir build
-    - cd build
+    - mkdir build-ubuntu
+    - cd build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
     - cmake --build . --target $CI_PROJECT_NAME -- -j8
 
-
-debug-build:
+debug-build-ubuntu:
   stage: build
   tags:
     - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
   artifacts:
     paths:
-      - debug-build/bin
+      - debug-build-ubuntu/bin
       - include
   script:
-    - mkdir debug-build
-    - cd debug-build
+    - mkdir debug-build-ubuntu
+    - cd debug-build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug
     - cmake --build . --target $CI_PROJECT_NAME -- -j8
 
-test:
+test-ubuntu:
   stage: test
   tags:
     - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
   artifacts:
     paths:
-      - build/ccov
+      - test-build-ubuntu/ccov
   dependencies: [] # Disable artifact restoration
   script:
-    - mkdir build
-    - cd build
+    - mkdir test-build-ubuntu
+    - cd test-build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
     - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
+
+release-test-ubuntu:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+
+build-arch:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  artifacts:
+    paths:
+      - build-arch/bin
+      - include
+  script:
+    - mkdir build-arch
+    - cd build-arch
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-arch:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  artifacts:
+    paths:
+      - debug-build-arch/bin
+      - include
+  script:
+    - mkdir debug-build-arch
+    - cd debug-build-arch
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-arch:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  artifacts:
+    paths:
+      - test-build-arch/ccov
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir test-build-arch
+    - cd test-build-arch
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    - cmake --build . --target ccov
+    - cmake --build . --target ccov-report
+
+release-test-arch:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    
