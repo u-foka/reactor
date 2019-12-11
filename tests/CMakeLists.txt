@@ -4,3 +4,5 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 add_subdirectory(unit_tests)
 add_subdirectory(reactor_benchmark)
+
+forward_to_parent(FORMAT_FILES)

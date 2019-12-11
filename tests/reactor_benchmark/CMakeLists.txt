@@ -5,6 +5,8 @@ find_package(Benchmark)
 if (${BENCHMARK_LIBRARY})
   file(GLOB_RECURSE TEST_SOURCES *.cpp)
   file(GLOB_RECURSE TEST_HEADERS *.hpp)
+  list(APPEND FORMAT_FILES ${TEST_SOURCES} ${TEST_HEADERS})
+  forward_to_parent(FORMAT_FILES)
 
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
