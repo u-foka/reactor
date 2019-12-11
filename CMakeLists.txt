@@ -59,18 +59,17 @@ include(date_time)
 DATE(CURR_DATE)
 YEAR(CURR_YEAR)
 
+include(forward_to_parent)
+
 include_directories("include")
 
 configure_file(src/config.h.in config.h)
 add_definitions(-include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
 
-if(UNIX)
-   set(PLATFORM_HEADERS_PATTERN "src/unix/*.hpp")
-   set(PLATFORM_SOURCES_PATTERN "src/unix/*.cpp")
-endif(UNIX)
+file(GLOB SOURCES "src/*.cpp")
+file(GLOB HEADERS "src/*.hpp" "include/reactor/*.hpp")
 
-file(GLOB SOURCES "src/*.cpp" ${PLATFORM_SOURCES_PATTERN})
-file(GLOB HEADERS "src/*.hpp" "include/*.hpp" ${PLATFORM_HEADERS_PATTERN})
+set(FORMAT_FILES ${SOURCES} ${HEADERS})
 
 include_directories(${ROOT_SOURCE_DIR})
 
@@ -117,12 +116,13 @@ if(NOT HAS_PARENT)
   # Adding clang-format target if executable is found
   find_program(CLANG_FORMAT "clang-format")
   if(CLANG_FORMAT)
+    list(REMOVE_DUPLICATES FORMAT_FILES)
     add_custom_target(
       clang-format
       COMMAND ${CLANG_FORMAT}
       -i
       -style=file
-      ${SOURCES} ${HEADERS}
+      ${FORMAT_FILES}
       )
   endif()
 

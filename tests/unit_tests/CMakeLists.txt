@@ -8,9 +8,12 @@ add_code_coverage_all_targets()
 
 file(GLOB_RECURSE TEST_SOURCES *.cpp)
 file(GLOB_RECURSE TEST_HEADERS *.hpp)
+list(APPEND FORMAT_FILES ${TEST_SOURCES} ${TEST_HEADERS})
 
 file(GLOB_RECURSE MOCK_SOURCES ${ROOT_SOURCE_DIR}/mocks/*.cpp)
 file(GLOB_RECURSE MOCK_HEADERS ${ROOT_SOURCE_DIR}/mocks/*.hpp)
+list(APPEND FORMAT_FILES ${MOCK_SOURCES} ${MOCK_HEADERS})
+forward_to_parent(FORMAT_FILES)
 
 include_directories("../../thirdparty/gtest/include")
 include_directories("../../thirdparty/gmock/include")
