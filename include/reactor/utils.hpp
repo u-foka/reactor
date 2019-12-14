@@ -10,8 +10,7 @@
 #define X_MACRO_STR(s) #s
 #define MACRO_STR(s) X_MACRO_STR(s)
 
-namespace iws {
-namespace reactor_utils {
+namespace iws::reactor::detail {
 
 template<typename Container>
 typename Container::iterator find(Container &container, const typename Container::value_type &what)
@@ -49,7 +48,6 @@ void erase_if(ContainerT &items, const PredicateT &predicate)
    }
 }
 
-} // namespace reactor_utils
-} // namespace iws
+} // namespace iws::reactor::detail
 
 #endif // REACTOR_UTILS_HPP

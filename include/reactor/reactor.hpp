@@ -18,7 +18,7 @@
 #include "callback_holder.hpp"
 #include "utils.hpp"
 
-namespace iws {
+namespace iws::reactor {
 
 class reactor;
 extern reactor &r;
@@ -542,7 +542,7 @@ std::shared_ptr<T> reactor::get_ptr(T &obj)
 
    // Try to find an existing instance
    auto oi =
-         reactor_utils::find_if(_object_list, [&obj](const std::shared_ptr<void> &item) { return &obj == item.get(); });
+         detail::find_if(_object_list, [&obj](const std::shared_ptr<void> &item) { return &obj == item.get(); });
 
    if (oi != _object_list.end())
    {
@@ -835,6 +835,6 @@ const std::type_info &reactor::addon_filter<T>::get_interface_type() const
    return typeid(typename T::interface);
 }
 
-} // namespace iws
+} // namespace iws::reactor
 
 #endif // REACTOR_HPP
