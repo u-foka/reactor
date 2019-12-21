@@ -5,6 +5,7 @@
 
 #include "priorities.hpp"
 #include "r.hpp"
+#include "reactor.hpp"
 
 namespace iws::reactor {
 

@@ -1,6 +1,8 @@
 #ifndef __IWS_REACTOR_FACTORY_HPP__
 #define __IWS_REACTOR_FACTORY_HPP__
 
+#include "factory_base.hpp"
+
 namespace iws::reactor {
 
 /**
