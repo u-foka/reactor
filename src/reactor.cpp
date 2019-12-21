@@ -27,20 +27,7 @@ reactor::~reactor()
    reset_objects();
 }
 
-reactor::factory_base::factory_base(const std::type_info &type)
-      : _type(type)
-{
-}
-
-reactor::factory_base::~factory_base() {}
-
-const std::type_info &reactor::factory_base::get_type() const
-{
-   return _type;
-}
-
-void reactor::register_factory(
-      const std::string &instance, priorities priority, std::unique_ptr<reactor::factory_base> &&factory)
+void reactor::register_factory(const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
 {
    std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
 
@@ -271,28 +258,6 @@ void reactor::unregister_contract(contract_base *cont)
       _contract_list.erase(it);
    }
 }
-
-reactor::type_already_registred_exception::type_already_registred_exception(
-      const std::type_info &type, const std::string &name, priorities priority)
-      : type(type)
-      , name(name)
-      , priority(priority)
-{
-}
-
-const char *reactor::type_already_registred_exception::what() const noexcept
-{
-   std::stringstream ss;
-   ss << "There is already a factory with the given type, name and priority registred: " << type.name() << ", '" << name
-      << "', " << priority;
-   msg_buffer = ss.str();
-
-   return msg_buffer.c_str();
-}
-
-reactor::contract_base::contract_base() {}
-
-reactor::contract_base::~contract_base() {}
 
 reactor::init::init()
 {

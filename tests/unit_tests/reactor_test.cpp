@@ -6,7 +6,12 @@
 #include <thread>
 #include <vector>
 
+#include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
+#include <reactor/factory.hpp>
+#include <reactor/factory_wrapper.hpp>
+#include <reactor/factory_registrator.hpp>
+#include <reactor/contract.hpp>
 
 using namespace std::chrono_literals;
 namespace sph = std::placeholders;
@@ -37,13 +42,13 @@ struct reactor : public ::testing::Test
    };
 
    template<typename T>
-   class mock_test_addon_filter : public re::reactor::addon_filter<T>
+   class mock_test_addon_filter : public re::addon_filter<T>
    {
     public:
-      typedef typename re::reactor::addon_func_map<T>::type map_type;
+      typedef typename re::addon_func_map<T>::type map_type;
       MOCK_METHOD1_T(mock_func, void(map_type &));
       mock_test_addon_filter()
-            : re::reactor::addon_filter<T>(std::bind(&mock_test_addon_filter<T>::mock_func, this, sph::_1))
+            : re::addon_filter<T>(std::bind(&mock_test_addon_filter<T>::mock_func, this, sph::_1))
       {
       }
    };
@@ -74,17 +79,17 @@ struct reactor : public ::testing::Test
    };
 
    template<typename T>
-   class test_contract : public re::reactor::typed_contract<T>
+   class test_contract : public re::typed_contract<T>
    {
     public:
-      const re::reactor::index _index;
+      const re::index _index;
 
       test_contract(const std::string &instance = std::string())
             : _index(typeid(T), instance)
       {
       }
 
-      virtual const re::reactor::index &get_index() const { return _index; }
+      virtual const re::index &get_index() const { return _index; }
    };
 
    class shutdown_checker
@@ -100,77 +105,77 @@ TEST_F(reactor, instantiate) {}
 
 TEST_F(reactor, basic)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<0>, test<0>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<0>, test<0>, false>()));
 
    EXPECT_EQ(0, inst->get(test_contract<test<0>>()).get_id());
 }
 
 TEST_F(reactor, missing)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<1>, test<1>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<1>, test<1>, false>()));
 
-   EXPECT_THROW(inst->get(test_contract<test<-1>>()).get_id(), re::reactor::factory_not_registred_exception);
+   EXPECT_THROW(inst->get(test_contract<test<-1>>()).get_id(), re::factory_not_registred_exception);
 }
 
 TEST_F(reactor, interface)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<2>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<2>, false>()));
 
    EXPECT_EQ(2, inst->get(test_contract<i_test>()).get_id());
 }
 
 TEST_F(reactor, throw_reregister)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<3>, false>()));
-   EXPECT_THROW(inst->register_factory(std::string(), re::reactor::prio_normal,
-                      std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<4>, false>())),
-         re::reactor::type_already_registred_exception);
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<3>, false>()));
+   EXPECT_THROW(inst->register_factory(std::string(), re::prio_normal,
+                      std::unique_ptr<re::factory_base>(new re::factory<i_test, test<4>, false>())),
+         re::type_already_registred_exception);
 }
 
 TEST_F(reactor, priority)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<5>, false>()));
-   inst->register_factory(std::string(), re::reactor::prio_unittest,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<6>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
+   inst->register_factory(std::string(), re::prio_unittest,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
 
    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
 }
 
 TEST_F(reactor, object_cache)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<5>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
 
-   inst->register_factory(std::string(), re::reactor::prio_unittest,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<6>, false>()));
+   inst->register_factory(std::string(), re::prio_unittest,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
 }
 
 TEST_F(reactor, unregister)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<5>, false>()));
-   inst->register_factory(std::string(), re::reactor::prio_unittest,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<6>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
+   inst->register_factory(std::string(), re::prio_unittest,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
 
-   EXPECT_THROW(inst->unregister_factory(std::string(), re::reactor::prio_override, typeid(i_test)),
-         re::reactor::factory_not_registred_exception);
-   EXPECT_THROW(inst->unregister_factory(std::string(), re::reactor::prio_unittest, typeid(test<6>)),
-         re::reactor::factory_not_registred_exception);
-   EXPECT_THROW(inst->unregister_factory("no_inst", re::reactor::prio_unittest, typeid(i_test)),
-         re::reactor::factory_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_override, typeid(i_test)),
+         re::factory_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_unittest, typeid(test<6>)),
+         re::factory_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory("no_inst", re::prio_unittest, typeid(i_test)),
+         re::factory_not_registred_exception);
 
    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
 
-   inst->unregister_factory(std::string(), re::reactor::prio_unittest, typeid(i_test));
+   inst->unregister_factory(std::string(), re::prio_unittest, typeid(i_test));
    inst->reset_objects(); // So i_test will be recreated with the effective factory on the next get()
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
@@ -178,10 +183,10 @@ TEST_F(reactor, unregister)
 
 TEST_F(reactor, named_factory)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<7>, false>()));
-   inst->register_factory("named", re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<8>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<7>, false>()));
+   inst->register_factory("named", re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<8>, false>()));
 
    EXPECT_EQ(7, inst->get(test_contract<i_test>()).get_id());
    EXPECT_EQ(8, inst->get(test_contract<i_test>("named")).get_id());
@@ -192,8 +197,8 @@ TEST_F(reactor, named_factory)
 
 TEST_F(reactor, named_objects_differ)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<i_test, test<9>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<9>, false>()));
 
    EXPECT_NE(&inst->get(test_contract<i_test>()), &inst->get(test_contract<i_test>("first")));
    EXPECT_NE(&inst->get(test_contract<i_test>("first")), &inst->get(test_contract<i_test>("second")));
@@ -201,9 +206,9 @@ TEST_F(reactor, named_objects_differ)
 
 TEST_F(reactor, instance_name)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(
-               new re::reactor::factory<test<10, const std::string &>, test<10, const std::string &>, true>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(
+               new re::factory<test<10, const std::string &>, test<10, const std::string &>, true>()));
 
    EXPECT_EQ("first", std::get<0>(inst->get(test_contract<test<10, const std::string &>>("first")).args));
    EXPECT_EQ("second", std::get<0>(inst->get(test_contract<test<10, const std::string &>>("second")).args));
@@ -214,12 +219,12 @@ TEST_F(reactor, passed_args)
    typedef test<11, const std::string &> test11;
    typedef test<12, const std::string &, const std::string &> test12;
 
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(
-               new re::reactor::factory<test11, test11, false, std::string>("arg1")));
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(
-               new re::reactor::factory<test12, test12, true, std::string>("arg2")));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(
+               new re::factory<test11, test11, false, std::string>("arg1")));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(
+               new re::factory<test12, test12, true, std::string>("arg2")));
 
    EXPECT_EQ("arg1", std::get<0>(inst->get(test_contract<test11>()).args));
    EXPECT_EQ("", std::get<0>(inst->get(test_contract<test12>()).args));
@@ -233,8 +238,8 @@ TEST_F(reactor, passed_args_global)
    typedef test<13, const std::string &> test13;
    typedef test<14, const std::string &, const std::string &> test14;
 
-   re::reactor::factory_registrator<test13, test13, false, true> reg1(re::reactor::prio_normal, std::string("arg1"));
-   re::reactor::factory_registrator<test14, test14, true, true> reg2(re::reactor::prio_normal, std::string("arg2"));
+   re::factory_registrator<test13, test13, false, true> reg1(re::prio_normal, std::string("arg1"));
+   re::factory_registrator<test14, test14, true, true> reg2(re::prio_normal, std::string("arg2"));
 
    EXPECT_EQ("arg1", std::get<0>(re::r.get(test_contract<test13>()).args));
    EXPECT_EQ("", std::get<0>(re::r.get(test_contract<test14>()).args));
@@ -245,9 +250,9 @@ TEST_F(reactor, passed_args_global)
 
 TEST_F(reactor, factory_wrapper)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(
-               new re::reactor::factory_wrapper<test<15, const std::string &, int>>([](const std::string &instance) {
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(
+               new re::factory_wrapper<test<15, const std::string &, int>>([](const std::string &instance) {
                   return std::make_shared<test<15, const std::string &, int>>(instance, 42);
                })));
 
@@ -258,17 +263,17 @@ TEST_F(reactor, factory_wrapper)
 TEST_F(reactor, registrator)
 {
    {
-      re::reactor::factory_registrator<i_test, test<16>, false, true> registrator(re::reactor::prio_normal);
+      re::factory_registrator<i_test, test<16>, false, true> registrator(re::prio_normal);
    }
    {
-      re::reactor::factory_registrator<i_test, test<17>, false, false> registrator(re::reactor::prio_normal);
+      re::factory_registrator<i_test, test<17>, false, false> registrator(re::prio_normal);
       EXPECT_EQ(17, re::r.get(test_contract<i_test>()).get_id());
    }
 
    auto problematic = []() {
-      re::reactor::factory_registrator<i_test, test<18>, false, true> registrator(re::reactor::prio_normal);
+      re::factory_registrator<i_test, test<18>, false, true> registrator(re::prio_normal);
    };
-   EXPECT_THROW(problematic(), re::reactor::type_already_registred_exception);
+   EXPECT_THROW(problematic(), re::type_already_registred_exception);
 }
 
 TEST_F(reactor, concurrent_get)
@@ -278,8 +283,8 @@ TEST_F(reactor, concurrent_get)
    constexpr int rounds = 1000;
    constexpr int threads = 10;
 
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<19>, test<19>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<19>, test<19>, false>()));
 
    auto fun = [&]() { return &inst->get(test_contract<test<19>>()); };
 
@@ -311,8 +316,8 @@ TEST_F(reactor, concurrent_get)
 
 TEST_F(reactor, holder)
 {
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<20>, test<20>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<20>, test<20>, false>()));
 
    auto &obj = inst->get(test_contract<test<20>>());
    auto holder = inst->get_ptr(obj);
@@ -329,60 +334,60 @@ TEST_F(reactor, contract)
    EXPECT_EQ(0ul, inst->unsatisfied_contracts().size());
 
    // Simple
-   re::reactor::contract<test<23>> contract23(inst);
+   re::contract<test<23>> contract23(inst);
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<23>, test<23>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<23>, test<23>, false>()));
 
    EXPECT_TRUE(inst->validate_contracts());
    EXPECT_EQ(0ul, inst->unsatisfied_contracts().size());
 
    // After unregister
-   re::reactor::contract<test<24>> contract24(inst);
+   re::contract<test<24>> contract24(inst);
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<24>, test<24>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<24>, test<24>, false>()));
 
    EXPECT_TRUE(inst->validate_contracts());
    EXPECT_EQ(0ul, inst->unsatisfied_contracts().size());
 
-   inst->unregister_factory(std::string(), re::reactor::prio_normal, typeid(test<24>));
+   inst->unregister_factory(std::string(), re::prio_normal, typeid(test<24>));
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
 
    // Named
-   re::reactor::contract<test<25>> contract25(inst, "named");
+   re::contract<test<25>> contract25(inst, "named");
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(2ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory("other", re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<25>, test<25>, false>()));
+   inst->register_factory("other", re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<25>, test<25>, false>()));
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(2ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory("named", re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<25>, test<25>, false>()));
+   inst->register_factory("named", re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<25>, test<25>, false>()));
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
 
-   inst->unregister_factory("named", re::reactor::prio_normal, typeid(test<25>));
+   inst->unregister_factory("named", re::prio_normal, typeid(test<25>));
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(2ul, inst->unsatisfied_contracts().size());
 
    // Satisfy named by default factory
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(new re::reactor::factory<test<25>, test<25>, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(new re::factory<test<25>, test<25>, false>()));
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
@@ -390,12 +395,12 @@ TEST_F(reactor, contract)
 
 TEST_F(reactor, contract_global_registration)
 {
-   re::reactor::contract<test<26>> contract26;
+   re::contract<test<26>> contract26;
 
    EXPECT_FALSE(re::r.validate_contracts());
    EXPECT_LE(1ul, re::r.unsatisfied_contracts().size());
 
-   re::reactor::factory_registrator<test<26>, test<26>, false, true> registrator26(re::reactor::prio_normal);
+   re::factory_registrator<test<26>, test<26>, false, true> registrator26(re::prio_normal);
 
    auto &test26 = re::r.get(contract26);
 
@@ -409,8 +414,8 @@ TEST_F(reactor, addon_simple)
 
    EXPECT_CALL(addon_mock, doit("testing")).Times(1);
 
-   inst->register_addon(std::string(), re::reactor::prio_normal,
-         std::make_unique<re::reactor::addon<i_test::test_addon>>(std::move(addon_fun)));
+   inst->register_addon(std::string(), re::prio_normal,
+         std::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
@@ -422,16 +427,16 @@ TEST_F(reactor, addon_simple)
       addon->addon_func("testing");
    }
 
-   EXPECT_THROW(inst->unregister_addon(std::string(), re::reactor::prio_override, typeid(i_test::test_addon)),
-         re::reactor::addon_not_registred_exception);
-   EXPECT_THROW(inst->unregister_factory(std::string(), re::reactor::prio_normal, typeid(std::string)),
-         re::reactor::factory_not_registred_exception);
-   EXPECT_THROW(inst->unregister_factory("no_inst", re::reactor::prio_normal, typeid(i_test::test_addon)),
-         re::reactor::factory_not_registred_exception);
+   EXPECT_THROW(inst->unregister_addon(std::string(), re::prio_override, typeid(i_test::test_addon)),
+         re::addon_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_normal, typeid(std::string)),
+         re::factory_not_registred_exception);
+   EXPECT_THROW(inst->unregister_factory("no_inst", re::prio_normal, typeid(i_test::test_addon)),
+         re::factory_not_registred_exception);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
-   inst->unregister_addon(std::string(), re::reactor::prio_normal, typeid(i_test::test_addon));
+   inst->unregister_addon(std::string(), re::prio_normal, typeid(i_test::test_addon));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
 }
@@ -440,27 +445,27 @@ TEST_F(reactor, addon_filter)
 {
    mock_test_addon addon_mock_norm;
    EXPECT_CALL(addon_mock_norm, doit("testing")).Times(0);
-   inst->register_addon(std::string(), re::reactor::prio_normal,
-         std::make_unique<re::reactor::addon<i_test::test_addon>>(addon_mock_norm.doit_fun()));
+   inst->register_addon(std::string(), re::prio_normal,
+         std::make_unique<re::addon<i_test::test_addon>>(addon_mock_norm.doit_fun()));
 
    mock_test_addon addon_mock_ut;
    EXPECT_CALL(addon_mock_ut, doit("testing")).Times(1);
-   inst->register_addon(std::string(), re::reactor::prio_unittest,
-         std::make_unique<re::reactor::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
+   inst->register_addon(std::string(), re::prio_unittest,
+         std::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
 
    mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
-   typedef typename re::reactor::addon_func_map<i_test::test_addon>::type addon_map_type;
+   typedef typename re::addon_func_map<i_test::test_addon>::type addon_map_type;
    EXPECT_CALL(addon_filter_mock, mock_func(_)).WillRepeatedly(Invoke([](addon_map_type &addons) {
-      re::detail::erase_if(addons, [](auto &item) { return item.first != re::reactor::prio_unittest; });
+      re::detail::erase_if(addons, [](auto &item) { return item.first != re::prio_unittest; });
    }));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 
-   auto filter = std::make_unique<re::reactor::addon_filter<i_test::test_addon>>(addon_filter_mock);
+   auto filter = std::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
    EXPECT_EQ(std::type_index(filter->get_interface_type()), std::type_index(typeid(i_test)));
 
-   inst->register_addon_filter(std::string(), re::reactor::prio_unittest, std::move(filter));
+   inst->register_addon_filter(std::string(), re::prio_unittest, std::move(filter));
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
@@ -469,16 +474,16 @@ TEST_F(reactor, addon_filter)
       addon->addon_func("testing");
    }
 
-   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::reactor::prio_override, typeid(i_test::test_addon)),
-         re::reactor::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::reactor::prio_unittest, typeid(std::string)),
-         re::reactor::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filter("no_inst", re::reactor::prio_unittest, typeid(i_test::test_addon)),
-         re::reactor::addon_filter_not_registred_exception);
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_override, typeid(i_test::test_addon)),
+         re::addon_filter_not_registred_exception);
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_unittest, typeid(std::string)),
+         re::addon_filter_not_registred_exception);
+   EXPECT_THROW(inst->unregister_addon_filter("no_inst", re::prio_unittest, typeid(i_test::test_addon)),
+         re::addon_filter_not_registred_exception);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
-   inst->unregister_addon_filter(std::string(), re::reactor::prio_unittest, typeid(i_test::test_addon));
+   inst->unregister_addon_filter(std::string(), re::prio_unittest, typeid(i_test::test_addon));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 }
@@ -486,7 +491,7 @@ TEST_F(reactor, addon_filter)
 TEST_F(reactor, factory_result)
 {
    auto val = std::make_shared<test<27>>();
-   re::reactor::factory_result obj(val);
+   re::factory_result obj(val);
 
    EXPECT_EQ(obj.get<test<27>>().get(), val.get());
    EXPECT_THROW(obj.get<test<0>>(), std::logic_error);
@@ -495,7 +500,7 @@ TEST_F(reactor, factory_result)
 TEST_F(reactor, factory_not_registred_exception_what)
 {
    const std::string what("WHAT?!");
-   const re::reactor::factory_not_registred_exception ex(typeid(reactor), what);
+   const re::factory_not_registred_exception ex(typeid(reactor), what);
 
    EXPECT_GE(strlen(ex.what()), 0ul);
    EXPECT_GE(strlen(ex.what()), 0ul); // Also check cached
@@ -504,7 +509,7 @@ TEST_F(reactor, factory_not_registred_exception_what)
 TEST_F(reactor, type_already_registred_exception_what)
 {
    const std::string what("WHAT?!");
-   const re::reactor::type_already_registred_exception ex(typeid(reactor), what, re::reactor::prio_normal);
+   const re::type_already_registred_exception ex(typeid(reactor), what, re::prio_normal);
 
    EXPECT_GE(strlen(ex.what()), 0ul);
    EXPECT_GE(strlen(ex.what()), 0ul); // Also check cached
@@ -514,9 +519,9 @@ TEST_F(reactor, is_shutting_down)
 {
    EXPECT_EQ(inst->is_shutting_down(), false);
 
-   inst->register_factory(std::string(), re::reactor::prio_normal,
-         std::unique_ptr<re::reactor::factory_base>(
-               new re::reactor::factory<shutdown_checker, shutdown_checker, false>()));
+   inst->register_factory(std::string(), re::prio_normal,
+         std::unique_ptr<re::factory_base>(
+               new re::factory<shutdown_checker, shutdown_checker, false>()));
 
    inst->get(test_contract<shutdown_checker>()).sig_dtor.connect([&] { EXPECT_EQ(inst->is_shutting_down(), true); });
 
