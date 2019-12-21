@@ -85,7 +85,8 @@ struct reactor : public ::testing::Test
       const re::index _index;
 
       test_contract(const std::string &instance = std::string())
-            : _index(typeid(T), instance)
+            : re::typed_contract<T>(nullptr)
+            , _index(typeid(T), instance)
       {
       }
 
@@ -283,10 +284,12 @@ TEST_F(reactor, concurrent_get)
    constexpr int rounds = 1000;
    constexpr int threads = 10;
 
+   test_contract<test<19>> ct;
+
    inst->register_factory(std::string(), re::prio_normal,
          std::unique_ptr<re::factory_base>(new re::factory<test<19>, test<19>, false>()));
 
-   auto fun = [&]() { return &inst->get(test_contract<test<19>>()); };
+   auto fun = [&]() { return &inst->get(ct); };
 
    std::vector<std::future<test<19> *>> futures;
    futures.resize(threads);
