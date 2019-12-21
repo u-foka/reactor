@@ -5,7 +5,7 @@ namespace iws::reactor {
 
 class addon_filter_base
 {
-   public:
+ public:
    virtual ~addon_filter_base() {}
    virtual const std::type_info &get_type() const = 0;
    virtual const std::type_info &get_interface_type() const = 0;

@@ -1,13 +1,13 @@
 #ifndef __IWS_REACTOR_REACTOR_HPP__
 #define __IWS_REACTOR_REACTOR_HPP__
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <string>
 #include <typeindex>
 #include <vector>
-#include <atomic>
 
 #include "addon.hpp"
 #include "addon_base.hpp"

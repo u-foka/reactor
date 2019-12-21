@@ -22,26 +22,29 @@ class not_registred_exception : public std::exception
 
 class factory_not_registred_exception : public not_registred_exception
 {
-  public:
-    factory_not_registred_exception(const std::type_info &type, const std::string &name);
-  private:
-    static const std::string category;
+ public:
+   factory_not_registred_exception(const std::type_info &type, const std::string &name);
+
+ private:
+   static const std::string category;
 };
 
 class addon_not_registred_exception : public not_registred_exception
 {
-  public:
-    addon_not_registred_exception(const std::type_info &type, const std::string &name);
-  private:
-    static const std::string category;
+ public:
+   addon_not_registred_exception(const std::type_info &type, const std::string &name);
+
+ private:
+   static const std::string category;
 };
 
 class addon_filter_not_registred_exception : public not_registred_exception
 {
-  public:
-    addon_filter_not_registred_exception(const std::type_info &type, const std::string &name);
-  private:
-    static const std::string category;
+ public:
+   addon_filter_not_registred_exception(const std::type_info &type, const std::string &name);
+
+ private:
+   static const std::string category;
 };
 
 } // namespace iws::reactor

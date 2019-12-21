@@ -1,8 +1,8 @@
 #ifndef __IWS_REACTOR_FACTORY_RESULT_HPP__
 #define __IWS_REACTOR_FACTORY_RESULT_HPP__
 
-#include <typeindex>
 #include <memory>
+#include <typeindex>
 
 namespace iws::reactor {
 

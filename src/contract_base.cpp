@@ -6,24 +6,27 @@
 namespace iws::reactor {
 
 contract_base::contract_base()
-   : _r_inst(&r)
+      : _r_inst(&r)
 {
-   if (nullptr != _r_inst) {
+   if (nullptr != _r_inst)
+   {
       _r_inst->register_contract(this);
    }
 }
 
 contract_base::contract_base(reactor *r_inst)
-   : _r_inst(r_inst)
+      : _r_inst(r_inst)
 {
-   if (nullptr != _r_inst) {
+   if (nullptr != _r_inst)
+   {
       _r_inst->register_contract(this);
    }
 }
 
 contract_base::~contract_base()
 {
-   if (nullptr != _r_inst) {
+   if (nullptr != _r_inst)
+   {
       _r_inst->unregister_contract(this);
    }
 }

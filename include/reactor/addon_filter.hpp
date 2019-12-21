@@ -13,7 +13,7 @@ namespace iws::reactor {
 template<typename T>
 class addon_filter : public addon_filter_base
 {
-   public:
+ public:
    typedef std::function<void(typename addon_func_map<T>::type &)> func;
 
    addon_filter(func &&filter_func);

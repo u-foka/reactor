@@ -6,13 +6,13 @@ namespace iws::reactor {
 template<typename T, bool unregister = false>
 class addon_registrator
 {
-   public:
+ public:
    addon_registrator(priorities priority, addon<T> &&inst);
    addon_registrator(const std::string &instance, priorities priority, addon<T> &&inst);
 
    ~addon_registrator();
 
-   private:
+ private:
    const std::string _name;
    const priorities _priority;
 };

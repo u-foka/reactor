@@ -4,8 +4,8 @@
 #include <map>
 #include <type_traits>
 
-#include "priorities.hpp"
 #include "addon.hpp"
+#include "priorities.hpp"
 
 namespace iws::reactor {
 

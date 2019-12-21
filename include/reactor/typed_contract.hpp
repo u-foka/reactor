@@ -8,20 +8,22 @@ namespace iws::reactor {
 template<typename T>
 class typed_contract : public contract_base
 {
-   public:
+ public:
    typed_contract();
    explicit typed_contract(reactor *r_inst);
 };
 
 template<typename T>
 typed_contract<T>::typed_contract()
-   : contract_base()
-{}
+      : contract_base()
+{
+}
 
 template<typename T>
 typed_contract<T>::typed_contract(reactor *r_inst)
-   : contract_base(r_inst)
-{}
+      : contract_base(r_inst)
+{
+}
 
 } // namespace iws::reactor
 

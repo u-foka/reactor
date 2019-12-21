@@ -27,7 +27,8 @@ reactor::~reactor()
    reset_objects();
 }
 
-void reactor::register_factory(const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
+void reactor::register_factory(
+      const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
 {
    std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
 

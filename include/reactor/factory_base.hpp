@@ -1,8 +1,8 @@
 #ifndef __IWS_REACTOR_FACTORY_BASE_HPP__
 #define __IWS_REACTOR_FACTORY_BASE_HPP__
 
-#include <typeinfo>
 #include <string>
+#include <typeinfo>
 
 #include "factory_result.hpp"
 

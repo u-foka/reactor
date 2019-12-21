@@ -1,9 +1,9 @@
 #ifndef __IWS_REACTOR_INDEX_HPP__
 #define __IWS_REACTOR_INDEX_HPP__
 
-#include <utility>
-#include <typeindex>
 #include <string>
+#include <typeindex>
+#include <utility>
 
 namespace iws::reactor {
 

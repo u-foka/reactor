@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "r.hpp"
 #include "priorities.hpp"
+#include "r.hpp"
 
 namespace iws::reactor {
 
@@ -54,8 +54,7 @@ class factory_registrator
 
 template<typename I, typename T, bool pass_name, bool unregister>
 template<typename... Args>
-factory_registrator<I, T, pass_name, unregister>::factory_registrator(
-      priorities priority, Args &&... args)
+factory_registrator<I, T, pass_name, unregister>::factory_registrator(priorities priority, Args &&... args)
       : _name(std::string())
       , _priority(priority)
 {

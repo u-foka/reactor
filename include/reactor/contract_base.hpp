@@ -14,7 +14,8 @@ class contract_base
    explicit contract_base(reactor *r_inst);
    virtual ~contract_base();
    virtual const index &get_index() const = 0;
-   private:
+
+ private:
    reactor *_r_inst;
 };
 

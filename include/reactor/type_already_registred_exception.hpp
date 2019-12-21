@@ -2,8 +2,8 @@
 #define __IWS_REACTOR_TYPE_ALREADY_REGISTRED_EXCEPTION_HPP__
 
 #include <exception>
-#include <typeinfo>
 #include <string>
+#include <typeinfo>
 
 #include "priorities.hpp"
 
