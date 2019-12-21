@@ -7,6 +7,7 @@
 #include <string>
 #include <typeindex>
 #include <vector>
+#include <atomic>
 
 #include "addon.hpp"
 #include "addon_base.hpp"
