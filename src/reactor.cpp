@@ -2,14 +2,6 @@
 
 namespace iws::reactor {
 
-// Memory for the reactor object
-static typename std::aligned_storage<sizeof(reactor), alignof(reactor)>::type r_memory;
-reactor &r = reinterpret_cast<reactor &>(r_memory);
-
-// This is done before the dynamic initialization is started since
-// std::atomic<int> has a trivial constructor and initialized with a constexpr
-std::atomic<int> reactor::init::instance_count(0);
-
 reactor::reactor()
       : _shutting_down(false)
 {
@@ -258,24 +250,6 @@ void reactor::unregister_contract(contract_base *cont)
    {
       _contract_list.erase(it);
    }
-}
-
-reactor::init::init()
-{
-   if (1 != ++instance_count)
-      return;
-
-   // Placement new for the global instance
-   new (&r) reactor();
-}
-
-reactor::init::~init()
-{
-   if (0 != --instance_count)
-      return;
-
-   // Destruct global instance
-   r.~reactor();
 }
 
 } // namespace iws::reactor

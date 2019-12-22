@@ -105,28 +105,9 @@ class reactor
    void register_contract(contract_base *cont);
    void unregister_contract(contract_base *cont);
    friend class contract_base;
-
- public:
-   /**
-    * @brief Go AWAY! Don't touch!
-    *
-    * Nifty Counter
-    * This class is used to initialize the global "r" object.
-    */
-   class init
-   {
-    public:
-      init();
-      ~init();
-
-    private:
-      static std::atomic<int> instance_count;
-   };
 };
 
 // ----
-
-static const reactor::init __init_reactor;
 
 template<typename T>
 T &reactor::get(const typed_contract<T> &contract)
