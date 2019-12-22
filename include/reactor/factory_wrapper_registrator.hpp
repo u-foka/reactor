@@ -1,6 +1,13 @@
 #ifndef __IWS_REACTOR_FACTORY_WRAPPER_REGISTRATOR_HPP__
 #define __IWS_REACTOR_FACTORY_WRAPPER_REGISTRATOR_HPP__
 
+#include <string>
+
+#include "priorities.hpp"
+#include "r.hpp"
+#include "reactor.hpp"
+#include "factory.hpp"
+
 namespace iws::reactor {
 
 /**

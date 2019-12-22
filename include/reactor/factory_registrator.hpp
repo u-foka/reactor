@@ -6,6 +6,7 @@
 #include "priorities.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
+#include "factory.hpp"
 
 namespace iws::reactor {
 
