@@ -6,7 +6,7 @@
 #include "priorities.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
-#include "factory.hpp"
+#include "factory_wrapper.hpp"
 
 namespace iws::reactor {
 
@@ -51,25 +51,25 @@ class factory_wrapper_registrator
 // ----
 
 template<typename I, bool unregister>
-reactor::factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
+factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
       priorities priority, const typename factory_wrapper<I>::producer_function &producer)
       : _name(std::string())
       , _priority(priority)
 {
-   r.register_factory(_name, _priority, std::make_unique<reactor::factory_wrapper<I>>(producer));
+   r.register_factory(_name, _priority, std::make_unique<factory_wrapper<I>>(producer));
 }
 
 template<typename I, bool unregister>
-reactor::factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
+factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
       const std::string &instance, priorities priority, const typename factory_wrapper<I>::producer_function &producer)
       : _name(instance)
       , _priority(priority)
 {
-   r.register_factory(_name, _priority, std::make_unique<reactor::factory_wrapper<I>>(producer));
+   r.register_factory(_name, _priority, std::make_unique<factory_wrapper<I>>(producer));
 }
 
 template<typename I, bool unregister>
-reactor::factory_wrapper_registrator<I, unregister>::~factory_wrapper_registrator()
+factory_wrapper_registrator<I, unregister>::~factory_wrapper_registrator()
 {
    if (unregister)
    {
