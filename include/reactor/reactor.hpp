@@ -21,6 +21,7 @@
 #include "priorities.hpp"
 #include "type_already_registred_exception.hpp"
 #include "typed_contract.hpp"
+#include "utils.hpp"
 
 namespace iws::reactor {
 
