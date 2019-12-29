@@ -20,7 +20,7 @@ class addon_registrator
 // ----
 
 template<typename T, bool unregister>
-reactor::addon_registrator<T, unregister>::addon_registrator(reactor::priorities priority, addon<T> &&inst)
+addon_registrator<T, unregister>::addon_registrator(priorities priority, addon<T> &&inst)
       : _name(std::string())
       , _priority(priority)
 {
@@ -28,8 +28,8 @@ reactor::addon_registrator<T, unregister>::addon_registrator(reactor::priorities
 }
 
 template<typename T, bool unregister>
-reactor::addon_registrator<T, unregister>::addon_registrator(
-      const std::string &instance, reactor::priorities priority, addon<T> &&inst)
+addon_registrator<T, unregister>::addon_registrator(
+      const std::string &instance, priorities priority, addon<T> &&inst)
       : _name(instance)
       , _priority(priority)
 {
@@ -37,7 +37,7 @@ reactor::addon_registrator<T, unregister>::addon_registrator(
 }
 
 template<typename T, bool unregister>
-reactor::addon_registrator<T, unregister>::~addon_registrator()
+addon_registrator<T, unregister>::~addon_registrator()
 {
    if (unregister)
    {
