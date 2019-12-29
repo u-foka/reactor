@@ -13,6 +13,7 @@ list(APPEND FORMAT_FILES ${TEST_SOURCES} ${TEST_HEADERS})
 file(GLOB_RECURSE MOCK_SOURCES ${ROOT_SOURCE_DIR}/mocks/*.cpp)
 file(GLOB_RECURSE MOCK_HEADERS ${ROOT_SOURCE_DIR}/mocks/*.hpp)
 list(APPEND FORMAT_FILES ${MOCK_SOURCES} ${MOCK_HEADERS})
+
 forward_to_parent(FORMAT_FILES)
 
 include_directories("../../thirdparty/gtest/include")
@@ -23,15 +24,9 @@ include_directories("../../thirdparty/gmock")
 
 include_directories("../../src")
 
-foreach(item ${SOURCES})
-  if(NOT item MATCHES "main.cpp$")
-    list(APPEND TEST_SOURCES ${item})
-  endif()
-endforeach()
-
 set(TEST_NAME ${PROJECT_NAME}_test)
 
-add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS} "../../thirdparty/gtest/src/gtest-all.cc" "../../thirdparty/gmock/src/gmock-all.cc" "../../thirdparty/gmock/src/gmock_main.cc")
+add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS} ${SOURCES} "../../thirdparty/gtest/src/gtest-all.cc" "../../thirdparty/gmock/src/gmock-all.cc" "../../thirdparty/gmock/src/gmock_main.cc")
 target_link_libraries(${TEST_NAME} PRIVATE Threads::Threads)
 target_code_coverage(${TEST_NAME} AUTO ALL EXCLUDE tests/* thirdparty/*)
 

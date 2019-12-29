@@ -1,14 +1,6 @@
 #include <reactor/reactor.hpp>
 
-namespace iws {
-
-// Memory for the reactor object
-static typename std::aligned_storage<sizeof(reactor), alignof(reactor)>::type r_memory;
-reactor &r = reinterpret_cast<reactor &>(r_memory);
-
-// This is done before the dynamic initialization is started since
-// std::atomic<int> has a trivial constructor and initialized with a constexpr
-std::atomic<int> reactor::init::instance_count(0);
+namespace iws::reactor {
 
 reactor::reactor()
       : _shutting_down(false)
@@ -27,20 +19,8 @@ reactor::~reactor()
    reset_objects();
 }
 
-reactor::factory_base::factory_base(const std::type_info &type)
-      : _type(type)
-{
-}
-
-reactor::factory_base::~factory_base() {}
-
-const std::type_info &reactor::factory_base::get_type() const
-{
-   return _type;
-}
-
 void reactor::register_factory(
-      const std::string &instance, priorities priority, std::unique_ptr<reactor::factory_base> &&factory)
+      const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
 {
    std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
 
@@ -272,44 +252,4 @@ void reactor::unregister_contract(contract_base *cont)
    }
 }
 
-reactor::type_already_registred_exception::type_already_registred_exception(
-      const std::type_info &type, const std::string &name, priorities priority)
-      : type(type)
-      , name(name)
-      , priority(priority)
-{
-}
-
-const char *reactor::type_already_registred_exception::what() const noexcept
-{
-   std::stringstream ss;
-   ss << "There is already a factory with the given type, name and priority registred: " << type.name() << ", '" << name
-      << "', " << priority;
-   msg_buffer = ss.str();
-
-   return msg_buffer.c_str();
-}
-
-reactor::contract_base::contract_base() {}
-
-reactor::contract_base::~contract_base() {}
-
-reactor::init::init()
-{
-   if (1 != ++instance_count)
-      return;
-
-   // Placement new for the global instance
-   new (&r) reactor();
-}
-
-reactor::init::~init()
-{
-   if (0 != --instance_count)
-      return;
-
-   // Destruct global instance
-   r.~reactor();
-}
-
-} // namespace iws
+} // namespace iws::reactor
