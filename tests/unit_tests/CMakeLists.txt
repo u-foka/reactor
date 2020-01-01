@@ -16,17 +16,20 @@ list(APPEND FORMAT_FILES ${MOCK_SOURCES} ${MOCK_HEADERS})
 
 forward_to_parent(FORMAT_FILES)
 
-include_directories("../../thirdparty/gtest/include")
-include_directories("../../thirdparty/gmock/include")
+set(GTEST_ROOT "../../thirdparty/googletest/googletest")
+set(GMOCK_ROOT "../../thirdparty/googletest/googlemock")
 
-include_directories("../../thirdparty/gtest")
-include_directories("../../thirdparty/gmock")
+include_directories("${GTEST_ROOT}/include")
+include_directories("${GMOCK_ROOT}/include")
+
+include_directories("${GTEST_ROOT}")
+include_directories("${GMOCK_ROOT}")
 
 include_directories("../../src")
 
 set(TEST_NAME ${PROJECT_NAME}_test)
 
-add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS} ${SOURCES} "../../thirdparty/gtest/src/gtest-all.cc" "../../thirdparty/gmock/src/gmock-all.cc" "../../thirdparty/gmock/src/gmock_main.cc")
+add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS} ${SOURCES} "${GTEST_ROOT}/src/gtest-all.cc" "${GMOCK_ROOT}/src/gmock-all.cc" "${GMOCK_ROOT}/src/gmock_main.cc")
 target_link_libraries(${TEST_NAME} PRIVATE Threads::Threads)
 target_code_coverage(${TEST_NAME} AUTO ALL EXCLUDE tests/* thirdparty/*)
 
