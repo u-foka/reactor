@@ -57,6 +57,7 @@ else()
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${COMMON_BUILD_ARCHIVE_DIR} CACHE PATH "Single Directory for all static libraries.")
 
   # Setup googletest up here so it wont get our warning flags
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
   add_subdirectory(thirdparty/googletest)
 endif()
 
@@ -80,7 +81,11 @@ include(forward_to_parent)
 include_directories("include")
 
 configure_file(src/config.h.in config.h)
-add_definitions(-include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"") # FIXME: Find a way to do this in an MSVC compatible way
+if(MSVC)
+  add_definitions(/FI "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+else(MSVC)
+  add_definitions(-include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+endif(MSVC)
 
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEADERS "src/*.hpp" "include/reactor/*.hpp")
@@ -92,6 +97,11 @@ include_directories(${ROOT_SOURCE_DIR})
 if(REACTOR_STATIC)
   add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 else(REACTOR_STATIC)
+  # To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
+  # See https://cmake.org/cmake/help/v3.4/variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS.html
+  # See https://blog.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
   add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
   # This will name the output .so files "libsomething.1.0" which is pretty useful
@@ -99,6 +109,8 @@ else(REACTOR_STATIC)
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_SOVERSION})
 endif(REACTOR_STATIC)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
 
 if(NOT HAS_PARENT)
   # In standalone mode setup the testing and maintenance targets

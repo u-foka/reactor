@@ -526,3 +526,9 @@ TEST_F(reactor, is_shutting_down)
    delete inst;
    inst = nullptr;
 }
+
+TEST_F(reactor, get_version)
+{
+   ASSERT_NE(inst->get_version(), std::string());
+   std::cout << "Reactor version: " << inst->get_version() << std::endl;
+}

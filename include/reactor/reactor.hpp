@@ -78,6 +78,8 @@ class reactor
 
    bool is_shutting_down();
 
+   const std::string &get_version() const;
+
  private:
    typedef std::map<priorities, std::unique_ptr<factory_base>> priorities_map;
    typedef std::map<index, priorities_map> factory_map;

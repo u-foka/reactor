@@ -3,8 +3,8 @@
 
 #include <reactor/utils.hpp>
 
-/* Product version */
-#define PRODUCT_VERSION @PROJECT_VERSION@
+/* Project version */
+#define PROJECT_VERSION @PROJECT_VERSION@
 
 /* Build date */
 #define BUILD_DATE @CURR_DATE@

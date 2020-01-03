@@ -10,6 +10,13 @@
 #define X_MACRO_STR(s) #s
 #define MACRO_STR(s) X_MACRO_STR(s)
 
+/* Windows dllimport (exports are handled by cmake) */
+#if !defined(REACTOR_LIBRARY) && !defined(REACTOR_STATIC) && defined(_WIN32)
+   #define REACTOR_IMPORT __declspec(dllimport)
+#else
+   #define REACTOR_IMPORT
+#endif
+
 namespace iws::reactor::detail {
 
 template<typename Container>
