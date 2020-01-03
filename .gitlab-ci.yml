@@ -125,4 +125,13 @@ release-test-arch:
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
     - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
-    
+
+build-msvc:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - mkdir build-msvc
+    - cd build-msvc
+    - cmake ..\ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
