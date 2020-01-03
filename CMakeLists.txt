@@ -3,14 +3,20 @@ cmake_minimum_required(VERSION 3.1)
 project(reactor)
 
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+  # Parse version information delivered with the package
   file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PACKAGED_PRODUCT_VERSION)
-  set(PROJECT_VERSION ${PACKAGED_PRODUCT_VERSION})
+  set(PRODUCT_VERSION PACKAGED_PRODUCT_VERSION)
+  list(GET PACKAGED_PRODUCT_VERSION 0 PROJECT_VERSION)
+  list(GET PACKAGED_PRODUCT_VERSION 1 PROJECT_SOVERSION)
 else()
+  # Detect version from git tag
   execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                  COMMAND git describe
-                  OUTPUT_VARIABLE DETECTED_PRODUCT_VERSION)
-
-  set(PROJECT_VERSION ${DETECTED_PRODUCT_VERSION})
+                  COMMAND git describe --match "v*"
+                  OUTPUT_VARIABLE PROJECT_VERSION)
+  string(REGEX REPLACE "^v(.+)\n$" "\\1" PROJECT_VERSION "${PROJECT_VERSION}")
+  string(REGEX REPLACE "^([(0-9)]+\\.[(0-9)]+).*$" "\\1" PROJECT_SOVERSION "${PROJECT_VERSION}")
+  set(DETECTED_PRODUCT_VERSION ${PROJECT_VERSION} ${PROJECT_SOVERSION})
+  set(PRODUCT_VERSION ${DETECTED_PRODUCT_VERSION})
 endif()
 
 get_directory_property(HAS_PARENT PARENT_DIRECTORY)
@@ -27,21 +33,31 @@ else()
   set(REACTOR_LIBRARY_TYPE "Dynamic")
 endif()
 
-message("Configuring ${PROJECT_NAME} version ${PROJECT_VERSION} in ${REACTOR_BUILD_MODE} mode as ${CMAKE_BUILD_TYPE} ${REACTOR_LIBRARY_TYPE} library")
+message("Configuring ${PROJECT_NAME} version ${PRODUCT_VERSION} in ${REACTOR_BUILD_MODE} mode as ${CMAKE_BUILD_TYPE} ${REACTOR_LIBRARY_TYPE} library")
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(PROJECT_SOURCE_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if(HAS_PARENT)
+  # When building as a subproject, skip common location setup and pass library variables up
+  
   set(REACTOR_LIBRARY ${PROJECT_NAME} PARENT_SCOPE)
   set(REACTOR_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
 else()
+  # Setup standalone build
+
+  set(REACTOR_LIBRARY ${PROJECT_NAME})
+  set(REACTOR_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
   # Common output directory
   set(COMMON_BUILD_BINARY_DIR ${PROJECT_BINARY_DIR}/bin)
   set(COMMON_BUILD_ARCHIVE_DIR ${PROJECT_BINARY_DIR}/lib)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${COMMON_BUILD_BINARY_DIR} CACHE PATH "Single Directory for all Executables.")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${COMMON_BUILD_BINARY_DIR} CACHE PATH "Single Directory for all Libraries")
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${COMMON_BUILD_ARCHIVE_DIR} CACHE PATH "Single Directory for all static libraries.")
+
+  # Setup googletest up here so it wont get our warning flags
+  add_subdirectory(thirdparty/googletest)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -64,7 +80,7 @@ include(forward_to_parent)
 include_directories("include")
 
 configure_file(src/config.h.in config.h)
-add_definitions(-include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+add_definitions(-include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"") # FIXME: Find a way to do this in an MSVC compatible way
 
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEADERS "src/*.hpp" "include/reactor/*.hpp")
@@ -77,9 +93,16 @@ if(REACTOR_STATIC)
   add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 else(REACTOR_STATIC)
   add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+
+  # This will name the output .so files "libsomething.1.0" which is pretty useful
+  set_target_properties(${PROJECT_NAME} PROPERTIES 
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_SOVERSION})
 endif(REACTOR_STATIC)
 
 if(NOT HAS_PARENT)
+  # In standalone mode setup the testing and maintenance targets
+
   enable_testing()
 
   add_subdirectory(tests)
