@@ -134,4 +134,4 @@ build-msvc:
     - mkdir build-msvc
     - cd build-msvc
     - cmake ..\ -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+    - cmake --build . --target $CI_PROJECT_NAME
