@@ -143,7 +143,7 @@ debug-build-msvc:
     - msvc
   script:
     - mkdir debug-build-msvc
-    - cd build-msvc
+    - cd debug-build-msvc
     - cmake ..\ -DCMAKE_BUILD_TYPE=Debug
     - cmake --build . --target $CI_PROJECT_NAME
     
