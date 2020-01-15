@@ -185,8 +185,7 @@ test-msvc:
 release-test-msvc:
   stage: test
   tags:
-    - docker
-  image: registry.iwstudio.hu/iws/abuild:latest
+    - msvc
   dependencies: [] # Disable artifact restoration
   script:
     - call "%VCVARSALL%" x64
