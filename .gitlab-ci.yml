@@ -3,8 +3,6 @@ stages:
   - test
 
 variables:
-    CC: clang
-    CXX: clang++
     DOCKER_DRIVER: overlay2
     GIT_SUBMODULE_STRATEGY: normal
     CTEST_OUTPUT_ON_FAILURE: 1
@@ -18,6 +16,9 @@ build-ubuntu:
     paths:
       - build-ubuntu/bin
       - include
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir build-ubuntu
     - cd build-ubuntu
@@ -33,6 +34,9 @@ debug-build-ubuntu:
     paths:
       - debug-build-ubuntu/bin
       - include
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir debug-build-ubuntu
     - cd debug-build-ubuntu
@@ -48,6 +52,9 @@ test-ubuntu:
     paths:
       - test-build-ubuntu/ccov
   dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
@@ -62,6 +69,9 @@ release-test-ubuntu:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
   dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir build
     - cd build
@@ -77,6 +87,9 @@ build-arch:
     paths:
       - build-arch/bin
       - include
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir build-arch
     - cd build-arch
@@ -92,6 +105,9 @@ debug-build-arch:
     paths:
       - debug-build-arch/bin
       - include
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir debug-build-arch
     - cd debug-build-arch
@@ -107,6 +123,9 @@ test-arch:
     paths:
       - test-build-arch/ccov
   dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir test-build-arch
     - cd test-build-arch
@@ -121,6 +140,9 @@ release-test-arch:
     - docker
   image: registry.iwstudio.hu/iws/abuild:latest
   dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
   script:
     - mkdir build
     - cd build
@@ -132,20 +154,22 @@ build-msvc:
   tags:
     - msvc
   script:
+    - call "%VCVARSALL%" x64
     - mkdir build-msvc
     - cd build-msvc
-    - cmake ..\ -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target $CI_PROJECT_NAME
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..\
+    - cmake --build . --target %CI_PROJECT_NAME%
     
 debug-build-msvc:
   stage: build
   tags:
     - msvc
   script:
+    - call "%VCVARSALL%" x64
     - mkdir debug-build-msvc
     - cd debug-build-msvc
-    - cmake ..\ -DCMAKE_BUILD_TYPE=Debug
-    - cmake --build . --target $CI_PROJECT_NAME
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\
+    - cmake --build . --target %CI_PROJECT_NAME%
     
 test-msvc:
   stage: test
@@ -161,11 +185,11 @@ test-msvc:
 release-test-msvc:
   stage: test
   tags:
-    - docker
-  image: registry.iwstudio.hu/iws/abuild:latest
+    - msvc
   dependencies: [] # Disable artifact restoration
   script:
+    - call "%VCVARSALL%" x64
     - mkdir build
     - cd build
-    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check
