@@ -2,6 +2,8 @@
 
 namespace iws::reactor {
 
+static const std::string REACTOR_VERSION = MACRO_STR(PROJECT_VERSION);
+
 reactor::reactor()
       : _shutting_down(false)
 {
@@ -236,6 +238,11 @@ reactor::contract_list reactor::unsatisfied_contracts()
 bool reactor::is_shutting_down()
 {
    return _shutting_down;
+}
+
+const std::string &reactor::get_version() const
+{
+   return REACTOR_VERSION;
 }
 
 void reactor::register_contract(contract_base *cont)

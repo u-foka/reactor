@@ -3,6 +3,8 @@
 
 #include <atomic>
 
+#include <reactor/utils.hpp>
+
 namespace iws::reactor {
 
 /**
@@ -22,7 +24,7 @@ class init
 };
 
 class reactor;
-extern reactor &r;
+REACTOR_IMPORT extern reactor &r;
 static const init __init_reactor;
 
 } // namespace iws::reactor

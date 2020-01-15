@@ -7,6 +7,7 @@ variables:
     CXX: clang++
     DOCKER_DRIVER: overlay2
     GIT_SUBMODULE_STRATEGY: normal
+    CTEST_OUTPUT_ON_FAILURE: 1
 
 build-ubuntu:
   stage: build
@@ -51,7 +52,7 @@ test-ubuntu:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
-    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    - cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
 
@@ -65,7 +66,7 @@ release-test-ubuntu:
     - mkdir build
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
-    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    - cmake --build . --target check
 
 build-arch:
   stage: build
@@ -110,7 +111,7 @@ test-arch:
     - mkdir test-build-arch
     - cd test-build-arch
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
-    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    - cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
 
@@ -124,5 +125,47 @@ release-test-arch:
     - mkdir build
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
-    - env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target check
+    - cmake --build . --target check
+
+build-msvc:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - mkdir build-msvc
+    - cd build-msvc
+    - cmake ..\ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME
     
+debug-build-msvc:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - mkdir debug-build-msvc
+    - cd debug-build-msvc
+    - cmake ..\ -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME
+    
+test-msvc:
+  stage: test
+  tags:
+    - msvc
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake --build . --target check
+
+release-test-msvc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
