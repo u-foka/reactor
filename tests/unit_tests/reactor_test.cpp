@@ -13,7 +13,6 @@
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
-using namespace std::chrono_literals;
 namespace sph = std::placeholders;
 
 using testing::_;
@@ -38,7 +37,7 @@ struct reactor : public ::testing::Test
    {
     public:
       MOCK_METHOD1(doit, void(std::string));
-      auto doit_fun() { return std::bind(&mock_test_addon::doit, this, sph::_1); }
+      std::function<void(std::string)> doit_fun() { return std::bind(&mock_test_addon::doit, this, sph::_1); }
    };
 
    template<typename T>
@@ -455,7 +454,7 @@ TEST_F(reactor, addon_filter)
    mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
    typedef typename re::addon_func_map<i_test::test_addon>::type addon_map_type;
    EXPECT_CALL(addon_filter_mock, mock_func(_)).WillRepeatedly(Invoke([](addon_map_type &addons) {
-      re::detail::erase_if(addons, [](auto &item) { return item.first != re::prio_unittest; });
+      re::detail::erase_if(addons, [](addon_map_type::value_type &item) { return item.first != re::prio_unittest; });
    }));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);

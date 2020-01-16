@@ -61,9 +61,19 @@ else()
   add_subdirectory(thirdparty/googletest)
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+option(CXX11_ENABLED "restrict c++ standard to c++11 (instead of the default c++14" false)
+
+if(CXX11_ENABLED)
+    set(CMAKE_CXX_STANDARD 11)
+else(CXX11_ENABLED)
+    set(CMAKE_CXX_STANDARD 14)
+endif(CXX11_ENABLED)
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+if(MSVC)
+    add_compile_options("/Zc:__cplusplus")
+endif(MSVC)
 
 include(enable_flag_if_supported)
 

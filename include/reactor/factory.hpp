@@ -17,6 +17,8 @@
 
 #include "factory_base.hpp"
 
+#include "integer_sequence_polyfil.hpp"
+
 namespace iws {
 namespace reactor {
 

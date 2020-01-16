@@ -21,6 +21,7 @@
 #include "r.hpp"
 #include "reactor.hpp"
 #include "factory.hpp"
+#include "make_unique_polyfil.hpp"
 
 namespace iws {
 namespace reactor {
