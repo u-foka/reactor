@@ -15,7 +15,8 @@
 #ifndef __IWS_REACTOR_PRIORITIES_HPP__
 #define __IWS_REACTOR_PRIORITIES_HPP__
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief Enumeration holding possible priority levels
@@ -28,6 +29,7 @@ enum priorities
    prio_unittest = 400,
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif // __IWS_REACTOR_PRIORITIES_HPP__

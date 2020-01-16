@@ -21,7 +21,8 @@
 #include "addon.hpp"
 #include "priorities.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 template<typename T>
 struct addon_func_map
@@ -29,6 +30,7 @@ struct addon_func_map
    typedef std::multimap<priorities, typename std::add_pointer<addon<T>>::type> type;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_FUNC_MAP_HPP__

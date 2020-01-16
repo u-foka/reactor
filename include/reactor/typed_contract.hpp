@@ -17,7 +17,8 @@
 
 #include "contract_base.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 template<typename T>
 class typed_contract : public contract_base
@@ -39,6 +40,7 @@ typed_contract<T>::typed_contract(reactor *r_inst)
 {
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_TYPED_CONTRACT_HPP__

@@ -19,7 +19,8 @@
 
 #include "index.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 template<typename T>
 class contract : public typed_contract<T>
@@ -61,6 +62,7 @@ const index &contract<T>::get_index() const
    return _index;
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_CONTRACT_HPP__

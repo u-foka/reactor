@@ -21,7 +21,8 @@
 
 #include "priorities.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 class type_already_registred_exception : public std::exception
 {
@@ -36,6 +37,7 @@ class type_already_registred_exception : public std::exception
    mutable std::string msg_buffer;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_TYPE_ALREADY_REGISTRED_EXCEPTION_HPP__

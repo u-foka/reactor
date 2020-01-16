@@ -20,7 +20,8 @@
 
 #include "factory_result.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief Interface for factories to be registred
@@ -53,6 +54,7 @@ class factory_base
    const std::type_info &_type;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_BASE_HPP__

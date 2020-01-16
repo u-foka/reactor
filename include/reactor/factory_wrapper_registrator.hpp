@@ -22,7 +22,8 @@
 #include "reactor.hpp"
 #include "factory_wrapper.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief registers a factory_wrapper
@@ -91,6 +92,7 @@ factory_wrapper_registrator<I, unregister>::~factory_wrapper_registrator()
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_WRAPPER_REGISTRATOR_HPP__

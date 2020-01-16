@@ -18,7 +18,8 @@
 #include <memory>
 #include <typeindex>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief Wrapper for objects returned by factories
@@ -71,6 +72,7 @@ std::shared_ptr<void> factory_result::get()
    return _obj;
 }
 
-} // namespace iws::reactor
+} // namespace reactor
+} // namespace iws
 
 #endif // __IWS_REACTOR_FACTORY_RESULT_HPP__

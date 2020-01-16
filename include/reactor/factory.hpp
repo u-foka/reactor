@@ -17,7 +17,8 @@
 
 #include "factory_base.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief default factory implementation
@@ -91,6 +92,7 @@ factory_result factory<I, T, pass_name, Args...>::produce_impl(
    return std::shared_ptr<I>(std::make_shared<T>(instance, std::get<Idx>(_args)...));
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_HPP__

@@ -22,7 +22,8 @@
 
 #include "addon_func_map.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 template<typename T>
 class addon_filter : public addon_filter_base
@@ -57,6 +58,7 @@ const std::type_info &addon_filter<T>::get_interface_type() const
    return typeid(typename T::interface);
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_FILTER_HPP__

@@ -36,7 +36,7 @@ class callback_holder
 
    size_t connect(value_type cb)
    {
-      std::unique_lock<std::shared_mutex> lock(_mutex);
+      std::unique_lock<std::shared_timed_mutex> lock(_mutex);
 
       _list[_next_id] = cb;
       return _next_id++;
@@ -44,7 +44,7 @@ class callback_holder
 
    bool disconnect(size_t id)
    {
-      std::unique_lock<std::shared_mutex> lock(_mutex);
+      std::unique_lock<std::shared_timed_mutex> lock(_mutex);
 
       auto it = _list.find(id);
       if (it != _list.end())
@@ -58,13 +58,13 @@ class callback_holder
 
    void clear()
    {
-      std::unique_lock<std::shared_mutex> lock(_mutex);
+      std::unique_lock<std::shared_timed_mutex> lock(_mutex);
       _list.clear();
    }
 
    void operator()(Args &&... args)
    {
-      std::shared_lock<std::shared_mutex> lock(_mutex);
+      std::shared_lock<std::shared_timed_mutex> lock(_mutex);
 
       for (auto it : _list)
       {
@@ -74,20 +74,20 @@ class callback_holder
 
    size_t callback_count()
    {
-      std::shared_lock<std::shared_mutex> lock(_mutex);
+      std::shared_lock<std::shared_timed_mutex> lock(_mutex);
       return _list.size();
    }
 
    operator bool()
    {
-      std::shared_lock<std::shared_mutex> lock(_mutex);
+      std::shared_lock<std::shared_timed_mutex> lock(_mutex);
       return 0 != _list.size();
    }
 
  private:
    size_t _next_id;
    std::map<size_t, value_type> _list;
-   std::shared_mutex _mutex;
+   std::shared_timed_mutex _mutex;
 };
 
 } // namespace iws

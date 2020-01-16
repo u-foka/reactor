@@ -14,7 +14,8 @@
 
 #include <reactor/not_registred_exception.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 not_registred_exception::not_registred_exception(
       const std::string &category, const std::type_info &type, const std::string &name)
@@ -53,4 +54,5 @@ addon_filter_not_registred_exception::addon_filter_not_registred_exception(
 {
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws

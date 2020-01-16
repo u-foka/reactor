@@ -31,7 +31,9 @@
    #define REACTOR_IMPORT
 #endif
 
-namespace iws::reactor::detail {
+namespace iws {
+namespace reactor {
+namespace detail {
 
 template<typename Container>
 typename Container::iterator find(Container &container, const typename Container::value_type &what)
@@ -69,6 +71,8 @@ void erase_if(ContainerT &items, const PredicateT &predicate)
    }
 }
 
-} // namespace iws::reactor::detail
+} // namespace detail
+} // namespace reactor
+} // namespace iws
 
 #endif // REACTOR_UTILS_HPP

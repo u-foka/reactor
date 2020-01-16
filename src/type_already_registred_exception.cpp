@@ -16,7 +16,8 @@
 
 #include <sstream>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 reactor::type_already_registred_exception::type_already_registred_exception(
       const std::type_info &type, const std::string &name, priorities priority)
@@ -36,4 +37,5 @@ const char *reactor::type_already_registred_exception::what() const noexcept
    return msg_buffer.c_str();
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws

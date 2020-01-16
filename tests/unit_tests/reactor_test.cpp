@@ -418,12 +418,12 @@ TEST_F(reactor, addon_simple)
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
-   for (auto &[prio, addon] : addons)
+   for (auto &item : addons)
    {
-      EXPECT_EQ(std::type_index(addon->get_type()), std::type_index(typeid(i_test::test_addon)));
-      EXPECT_EQ(std::type_index(addon->get_interface_type()), std::type_index(typeid(i_test)));
+      EXPECT_EQ(std::type_index(item.second->get_type()), std::type_index(typeid(i_test::test_addon)));
+      EXPECT_EQ(std::type_index(item.second->get_interface_type()), std::type_index(typeid(i_test)));
 
-      addon->addon_func("testing");
+      item.second->addon_func("testing");
    }
 
    EXPECT_THROW(inst->unregister_addon(std::string(), re::prio_override, typeid(i_test::test_addon)),
@@ -468,9 +468,9 @@ TEST_F(reactor, addon_filter)
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
-   for (auto &[prio, addon] : addons)
+   for (auto &item : addons)
    {
-      addon->addon_func("testing");
+      item.second->addon_func("testing");
    }
 
    EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_override, typeid(i_test::test_addon)),

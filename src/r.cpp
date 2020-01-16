@@ -16,7 +16,8 @@
 
 #include <reactor/reactor.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 // Memory for the reactor object
 static typename std::aligned_storage<sizeof(reactor), alignof(reactor)>::type r_memory;
@@ -44,4 +45,5 @@ init::~init()
    r.~reactor();
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws

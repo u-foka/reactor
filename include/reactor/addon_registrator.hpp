@@ -15,7 +15,8 @@
 #ifndef __IWS_REACTOR_ADDON_REGISTRATOR_HPP__
 #define __IWS_REACTOR_ADDON_REGISTRATOR_HPP__
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 template<typename T, bool unregister = false>
 class addon_registrator
@@ -59,6 +60,7 @@ addon_registrator<T, unregister>::~addon_registrator()
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_REGISTRATOR_HPP__

@@ -17,7 +17,8 @@
 
 #include "addon_base.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 template<typename T>
 class addon : public addon_base
@@ -50,6 +51,7 @@ const std::type_info &addon<T>::get_interface_type() const
    return typeid(typename T::interface);
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_HPP__

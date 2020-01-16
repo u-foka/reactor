@@ -17,7 +17,8 @@
 
 #include "index.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 class reactor;
 
@@ -33,6 +34,7 @@ class contract_base
    reactor *_r_inst;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_CONTRACT_BASE_HPP__

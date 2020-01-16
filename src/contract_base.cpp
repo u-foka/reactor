@@ -17,7 +17,8 @@
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 contract_base::contract_base()
       : _r_inst(&r)
@@ -45,4 +46,5 @@ contract_base::~contract_base()
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
