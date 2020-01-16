@@ -166,9 +166,6 @@ test-ubuntu-gcc:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
-  artifacts:
-    paths:
-      - test-build-ubuntu/ccov
   dependencies: [] # Disable artifact restoration
   variables:
     CC: gcc
@@ -176,7 +173,7 @@ test-ubuntu-gcc:
   script:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
-    - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
@@ -229,9 +226,6 @@ test-arch-gcc:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/abuild:latest
-  artifacts:
-    paths:
-      - test-build-arch/ccov
   dependencies: [] # Disable artifact restoration
   variables:
     CC: gcc
@@ -239,7 +233,7 @@ test-arch-gcc:
   script:
     - mkdir test-build-arch
     - cd test-build-arch
-    - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
@@ -292,9 +286,6 @@ test-ubuntu-cpp11-gcc:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
-  artifacts:
-    paths:
-      - test-build-ubuntu/ccov
   dependencies: [] # Disable artifact restoration
   variables:
     CC: gcc
@@ -302,7 +293,7 @@ test-ubuntu-cpp11-gcc:
   script:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
-    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
@@ -355,9 +346,6 @@ test-arch-cpp11-gcc:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/abuild:latest
-  artifacts:
-    paths:
-      - test-build-arch/ccov
   dependencies: [] # Disable artifact restoration
   variables:
     CC: gcc
@@ -365,7 +353,7 @@ test-arch-cpp11-gcc:
   script:
     - mkdir test-build-arch
     - cd test-build-arch
-    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
     - cmake --build . --target ccov
     - cmake --build . --target ccov-report
