@@ -175,8 +175,6 @@ test-ubuntu-gcc:
     - cd test-build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
 
 release-test-ubuntu-gcc:
   stage: test
@@ -235,8 +233,6 @@ test-arch-gcc:
     - cd test-build-arch
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
 
 release-test-arch-gcc:
   stage: test
@@ -295,8 +291,6 @@ test-ubuntu-cpp11-gcc:
     - cd test-build-ubuntu
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
 
 release-test-ubuntu-cpp11-gcc:
   stage: test
@@ -355,8 +349,6 @@ test-arch-cpp11-gcc:
     - cd test-build-arch
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
     - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
 
 release-test-arch-cpp11-gcc:
   stage: test
