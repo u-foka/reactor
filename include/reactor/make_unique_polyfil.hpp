@@ -31,10 +31,18 @@ std::unique_ptr<T> make_unique(Args &&... args)
 } // namespace polyfil
 } // namespace iws
 
-namespace std {
-    using ::iws::polyfil::make_unique;
-}
+#else // target >= C++14
 
-#endif // target < C++14
+#include <memory>
+
+namespace iws {
+namespace polyfil {
+
+using std::make_unique;
+
+} // namespace polyfil
+} // namespace iws
+
+#endif // target <> C++14
 
 #endif // __IWS_MAKE_UNIQUE_POLYFIL__

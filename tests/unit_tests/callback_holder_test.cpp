@@ -5,10 +5,13 @@
 #include <string>
 
 #include <reactor/callback_holder.hpp>
+#include <reactor/make_unique_polyfil.hpp>
 
 namespace ph = std::placeholders;
 using ::testing::_;
 using ::testing::Invoke;
+
+namespace pf = iws::polyfil;
 
 struct callback_holder : public ::testing::Test
 {
@@ -150,7 +153,7 @@ TEST_F(callback_holder, disconnect)
 TEST_F(callback_holder, forward_correct)
 {
    const std::string txt("here I am");
-   std::unique_ptr<std::string> to_be_moved(new std::string(txt));
+   auto to_be_moved = pf::make_unique<std::string>(txt);
    std::string callback_arg;
    EXPECT_CALL(mock, moved_arg(_)).WillRepeatedly(Invoke([&](std::unique_ptr<std::string> &&arg){
       std::unique_ptr<std::string> moved(std::move(arg));
@@ -164,7 +167,7 @@ TEST_F(callback_holder, forward_correct)
    EXPECT_EQ(to_be_moved.get(), nullptr); // Should be empty as it was moved into the callback
    EXPECT_EQ(callback_arg, txt);
 
-   to_be_moved.reset(new std::string(txt)); // Re-initialize the pointer
+   to_be_moved = pf::make_unique<std::string>(txt); // Re-initialize the pointer
    cb.connect(moved_arg_cb); // Connect the callback second time
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))

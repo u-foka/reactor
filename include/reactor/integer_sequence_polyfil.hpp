@@ -16,7 +16,6 @@
 #define __IWS_INTEGER_SEQUENCE_POLYFIL_HPP__
 
 #if __cplusplus < 201402L // target < C++14
-
 #include <cstddef>
 
 namespace iws {
@@ -41,14 +40,6 @@ struct make_integer_sequence<T, 0, Is...> : integer_sequence<T, Is...>
 {
 };
 
-} // namespace detail
-} // namespace iws
-
-namespace std {
-   
-using ::iws::polyfil::integer_sequence;
-using ::iws::polyfil::make_integer_sequence;
-
 template<std::size_t... Ints>
 using index_sequence = integer_sequence<std::size_t, Ints...>;
 
@@ -58,8 +49,24 @@ using make_index_sequence = make_integer_sequence<std::size_t, N>;
 template<typename... T>
 using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
-} // namespace std
+} // namespace polyfil
+} // namespace iws
 
-#endif // target < C++14
+#else // target >= C++14
+#include <utility>
+
+namespace iws {
+namespace polyfil {
+
+using std::integer_sequence;
+using std::make_integer_sequence;
+using std::index_sequence;
+using std::make_index_sequence;
+using std::index_sequence_for;
+
+} // namespace polyfil
+} // namespace iws
+
+#endif // target <> C++14
 
 #endif // __IWS_INTEGER_SEQUENCE_POLYFIL_HPP__

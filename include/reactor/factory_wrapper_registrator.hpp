@@ -71,7 +71,7 @@ factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
       : _name(std::string())
       , _priority(priority)
 {
-   r.register_factory(_name, _priority, std::make_unique<factory_wrapper<I>>(producer));
+   r.register_factory(_name, _priority, pf::make_unique<factory_wrapper<I>>(producer));
 }
 
 template<typename I, bool unregister>
@@ -80,7 +80,7 @@ factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
       : _name(instance)
       , _priority(priority)
 {
-   r.register_factory(_name, _priority, std::make_unique<factory_wrapper<I>>(producer));
+   r.register_factory(_name, _priority, pf::make_unique<factory_wrapper<I>>(producer));
 }
 
 template<typename I, bool unregister>

@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if __cplusplus < 201402L
+#ifndef __IWS_MIGHT_SHARED_MUTEX_HPP__
+#define __IWS_MIGHT_SHARED_MUTEX_HPP__
+
+#if __cplusplus < 201402L // target < C++14
 #include <mutex>
 
 namespace iws {
-namespace detail {
+namespace polyfil {
 
 class might_shared_mutex : public std::mutex
 {
@@ -32,14 +35,14 @@ class might_shared_lock : public std::unique_lock<T>
    }
 };
 
-} // namespace detail
+} // namespace polyfil
 } // namespace iws
 
-#else
+#else // target >= C++14
 #include <shared_mutex>
 
 namespace iws {
-namespace detail {
+namespace polyfil {
 
 class might_shared_mutex : public std::shared_timed_mutex
 {
@@ -55,7 +58,9 @@ class might_shared_lock : public std::shared_lock<T>
    }
 };
 
-} // namespace detail
+} // namespace polyfil
 } // namespace iws
 
-#endif
+#endif // target <> C++14
+
+#endif // __IWS_MIGHT_SHARED_MUTEX_HPP__

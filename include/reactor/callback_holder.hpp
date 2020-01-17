@@ -22,6 +22,8 @@
 
 namespace iws {
 
+namespace pf = polyfil;
+
 template<typename... Args>
 class callback_holder
 {
@@ -37,7 +39,7 @@ class callback_holder
 
    size_t connect(value_type cb)
    {
-      std::unique_lock<detail::might_shared_mutex> lock(_mutex);
+      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
 
       _list[_next_id] = cb;
       return _next_id++;
@@ -45,7 +47,7 @@ class callback_holder
 
    bool disconnect(size_t id)
    {
-      std::unique_lock<detail::might_shared_mutex> lock(_mutex);
+      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
 
       auto it = _list.find(id);
       if (it != _list.end())
@@ -59,13 +61,13 @@ class callback_holder
 
    void clear()
    {
-      std::unique_lock<detail::might_shared_mutex> lock(_mutex);
+      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
       _list.clear();
    }
 
    void operator()(Args &&... args)
    {
-      detail::might_shared_lock<detail::might_shared_mutex> lock(_mutex);
+      pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
 
       for (auto it : _list)
       {
@@ -75,20 +77,20 @@ class callback_holder
 
    size_t callback_count()
    {
-      detail::might_shared_lock<detail::might_shared_mutex> lock(_mutex);
+      pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
       return _list.size();
    }
 
    operator bool()
    {
-      detail::might_shared_lock<detail::might_shared_mutex> lock(_mutex);
+      pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
       return 0 != _list.size();
    }
 
  private:
    size_t _next_id;
    std::map<size_t, value_type> _list;
-   detail::might_shared_mutex _mutex;
+   pf::might_shared_mutex _mutex;
 };
 
 } // namespace iws

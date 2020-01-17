@@ -19,6 +19,7 @@ using testing::_;
 using testing::Invoke;
 
 namespace re = iws::reactor;
+namespace pf = iws::polyfil;
 
 struct reactor : public ::testing::Test
 {
@@ -413,7 +414,7 @@ TEST_F(reactor, addon_simple)
    EXPECT_CALL(addon_mock, doit("testing")).Times(1);
 
    inst->register_addon(
-         std::string(), re::prio_normal, std::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
@@ -444,12 +445,12 @@ TEST_F(reactor, addon_filter)
    mock_test_addon addon_mock_norm;
    EXPECT_CALL(addon_mock_norm, doit("testing")).Times(0);
    inst->register_addon(
-         std::string(), re::prio_normal, std::make_unique<re::addon<i_test::test_addon>>(addon_mock_norm.doit_fun()));
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(addon_mock_norm.doit_fun()));
 
    mock_test_addon addon_mock_ut;
    EXPECT_CALL(addon_mock_ut, doit("testing")).Times(1);
    inst->register_addon(
-         std::string(), re::prio_unittest, std::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
+         std::string(), re::prio_unittest, pf::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
 
    mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
    typedef typename re::addon_func_map<i_test::test_addon>::type addon_map_type;
@@ -459,7 +460,7 @@ TEST_F(reactor, addon_filter)
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 
-   auto filter = std::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
+   auto filter = pf::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
    EXPECT_EQ(std::type_index(filter->get_interface_type()), std::type_index(typeid(i_test)));
 

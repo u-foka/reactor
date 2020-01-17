@@ -18,6 +18,8 @@
 namespace iws {
 namespace reactor {
 
+namespace pf = ::iws::polyfil;
+
 template<typename T, bool unregister = false>
 class addon_registrator
 {
@@ -39,7 +41,7 @@ addon_registrator<T, unregister>::addon_registrator(priorities priority, addon<T
       : _name(std::string())
       , _priority(priority)
 {
-   r.register_addon(_name, _priority, std::make_unique<addon<T>>(std::move(inst)));
+   r.register_addon(_name, _priority, pf::make_unique<addon<T>>(std::move(inst)));
 }
 
 template<typename T, bool unregister>
@@ -48,7 +50,7 @@ addon_registrator<T, unregister>::addon_registrator(
       : _name(instance)
       , _priority(priority)
 {
-   r.register_addon(_name, _priority, std::make_unique<addon<T>>(std::move(inst)));
+   r.register_addon(_name, _priority, pf::make_unique<addon<T>>(std::move(inst)));
 }
 
 template<typename T, bool unregister>
