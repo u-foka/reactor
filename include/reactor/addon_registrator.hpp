@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 
 #ifndef __IWS_REACTOR_ADDON_REGISTRATOR_HPP__
 #define __IWS_REACTOR_ADDON_REGISTRATOR_HPP__
+
+#include "make_unique_polyfil.hpp"
 
 namespace iws {
 namespace reactor {

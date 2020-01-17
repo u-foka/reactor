@@ -12,6 +12,7 @@
 #include <reactor/factory_wrapper.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
+#include <reactor/make_unique_polyfil.hpp>
 
 namespace sph = std::placeholders;
 

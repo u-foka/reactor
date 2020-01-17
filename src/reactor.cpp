@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 namespace iws {
 namespace reactor {
 
-static const std::string REACTOR_VERSION = MACRO_STR(PROJECT_VERSION) " C++: " MACRO_STR(__cplusplus);
+static const std::string REACTOR_VERSION = MACRO_STR(PROJECT_VERSION);
 
 reactor::reactor()
       : _shutting_down(false)
