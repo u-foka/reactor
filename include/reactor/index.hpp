@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@
 #include <typeindex>
 #include <utility>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief Link to a reactor managed instance
  */
 typedef std::pair<std::type_index, std::string> index;
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_INDEX_HPP__

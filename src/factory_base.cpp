@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
 
 #include <reactor/factory_base.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 factory_base::factory_base(const std::type_info &type)
       : _type(type)
@@ -28,4 +29,5 @@ const std::type_info &factory_base::get_type() const
    return _type;
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws

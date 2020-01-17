@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,12 @@
 #include "r.hpp"
 #include "reactor.hpp"
 #include "factory.hpp"
+#include "make_unique_polyfil.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
+
+namespace pf = ::iws::polyfil;
 
 /**
  * @brief registers a factory
@@ -75,7 +79,7 @@ factory_registrator<I, T, pass_name, unregister>::factory_registrator(priorities
       , _priority(priority)
 {
    r.register_factory(
-         _name, _priority, std::make_unique<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
+         _name, _priority, pf::make_unique<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
 }
 
 template<typename I, typename T, bool pass_name, bool unregister>
@@ -86,7 +90,7 @@ factory_registrator<I, T, pass_name, unregister>::factory_registrator(
       , _priority(priority)
 {
    r.register_factory(
-         _name, _priority, std::make_unique<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
+         _name, _priority, pf::make_unique<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
 }
 
 template<typename I, typename T, bool pass_name, bool unregister>
@@ -98,6 +102,7 @@ factory_registrator<I, T, pass_name, unregister>::~factory_registrator()
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_REGISTRATOR_HPP__

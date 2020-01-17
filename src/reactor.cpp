@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
 
 #include <reactor/reactor.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 static const std::string REACTOR_VERSION = MACRO_STR(PROJECT_VERSION);
 
@@ -28,7 +29,7 @@ reactor::~reactor()
    std::unique_lock<std::recursive_mutex> reset_objects_lock(_reset_objects_mutex);
    _shutting_down = true;
 
-   std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
+   std::unique_lock<pf::might_shared_mutex> factory_write_lock(_factory_mutex);
    _factory_map.clear();
    factory_write_lock.unlock();
 
@@ -38,7 +39,7 @@ reactor::~reactor()
 void reactor::register_factory(
       const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
 {
-   std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
+   std::unique_lock<pf::might_shared_mutex> factory_write_lock(_factory_mutex);
 
    const index id(factory->get_type(), instance);
    auto it = _factory_map.find(id);
@@ -68,7 +69,7 @@ void reactor::register_factory(
 
 void reactor::unregister_factory(const std::string &instance, priorities priority, const std::type_info &type)
 {
-   std::unique_lock<std::shared_mutex> factory_write_lock(_factory_mutex);
+   std::unique_lock<pf::might_shared_mutex> factory_write_lock(_factory_mutex);
 
    const index id(type, instance);
 
@@ -100,7 +101,7 @@ void reactor::unregister_factory(const std::string &instance, priorities priorit
 
 void reactor::register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon)
 {
-   std::unique_lock<std::shared_mutex> addon_write_lock(_addon_mutex);
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(addon->get_type(), instance);
    _addon_map[id].insert({priority, std::move(addon)});
@@ -108,7 +109,7 @@ void reactor::register_addon(const std::string &instance, priorities priority, s
 
 void reactor::unregister_addon(const std::string &instance, priorities priority, const std::type_info &type)
 {
-   std::unique_lock<std::shared_mutex> addon_write_lock(_addon_mutex);
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(type, instance);
 
@@ -141,7 +142,7 @@ void reactor::unregister_addon(const std::string &instance, priorities priority,
 void reactor::register_addon_filter(
       const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter)
 {
-   std::unique_lock<std::shared_mutex> addon_write_lock(_addon_mutex);
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(filter->get_type(), instance);
    _addon_filter_map[id].insert({priority, std::move(filter)});
@@ -149,7 +150,7 @@ void reactor::register_addon_filter(
 
 void reactor::unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type)
 {
-   std::unique_lock<std::shared_mutex> addon_write_lock(_addon_mutex);
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(type, instance);
 
@@ -188,7 +189,7 @@ void reactor::reset_objects()
    // Do not change the locking order!
    // get() locks the map and list in this order, so we do the same to avoid dead locks
    std::unique_lock<std::recursive_mutex> object_list_lock(_object_list_mutex);
-   std::unique_lock<std::shared_mutex> object_map_write_lock(_object_map_mutex);
+   std::unique_lock<pf::might_shared_mutex> object_map_write_lock(_object_map_mutex);
 
    // The map holds weak copies so we can simply clear it
    _object_map.clear();
@@ -273,4 +274,5 @@ void reactor::unregister_contract(contract_base *cont)
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws

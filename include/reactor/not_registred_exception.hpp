@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
 #include <sstream>
 #include <string>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 class not_registred_exception : public std::exception
 {
@@ -61,6 +62,7 @@ class addon_filter_not_registred_exception : public not_registred_exception
    static const std::string category;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_NOT_REGISTRED_EXCEPTION_HPP__

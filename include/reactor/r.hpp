@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
 
 #include <reactor/utils.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief Go AWAY! Don't touch!
@@ -41,6 +42,7 @@ class reactor;
 REACTOR_IMPORT extern reactor &r;
 static const init __init_reactor;
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_R_HPP__

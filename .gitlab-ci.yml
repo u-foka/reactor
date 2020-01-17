@@ -12,16 +12,12 @@ build-ubuntu:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
-  artifacts:
-    paths:
-      - build-ubuntu/bin
-      - include
   variables:
     CC: clang
     CXX: clang++
   script:
-    - mkdir build-ubuntu
-    - cd build-ubuntu
+    - mkdir build
+    - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
     - cmake --build . --target $CI_PROJECT_NAME -- -j8
 
@@ -30,16 +26,12 @@ debug-build-ubuntu:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
-  artifacts:
-    paths:
-      - debug-build-ubuntu/bin
-      - include
   variables:
     CC: clang
     CXX: clang++
   script:
-    - mkdir debug-build-ubuntu
-    - cd debug-build-ubuntu
+    - mkdir build
+    - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug
     - cmake --build . --target $CI_PROJECT_NAME -- -j8
 
@@ -83,16 +75,12 @@ build-arch:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/abuild:latest
-  artifacts:
-    paths:
-      - build-arch/bin
-      - include
   variables:
     CC: clang
     CXX: clang++
   script:
-    - mkdir build-arch
-    - cd build-arch
+    - mkdir build
+    - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
     - cmake --build . --target $CI_PROJECT_NAME -- -j8
 
@@ -101,16 +89,12 @@ debug-build-arch:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/abuild:latest
-  artifacts:
-    paths:
-      - debug-build-arch/bin
-      - include
   variables:
     CC: clang
     CXX: clang++
   script:
-    - mkdir debug-build-arch
-    - cd debug-build-arch
+    - mkdir build
+    - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug
     - cmake --build . --target $CI_PROJECT_NAME -- -j8
 
@@ -148,6 +132,238 @@ release-test-arch:
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
     - cmake --build . --target check
+    
+build-ubuntu-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-ubuntu-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-ubuntu-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir test-build-ubuntu
+    - cd test-build-ubuntu
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
+    - cmake --build . --target check
+
+release-test-ubuntu-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
+
+build-arch-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-arch-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-arch-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir test-build-arch
+    - cd test-build-arch
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
+    - cmake --build . --target check
+
+release-test-arch-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
+
+build-ubuntu-cpp11-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-ubuntu-cpp11-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-ubuntu-cpp11-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir test-build-ubuntu
+    - cd test-build-ubuntu
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
+    - cmake --build . --target check
+
+release-test-ubuntu-cpp11-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
+
+build-arch-cpp11-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-arch-cpp11-gcc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-arch-cpp11-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir test-build-arch
+    - cd test-build-arch
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
+    - cmake --build . --target check
+
+release-test-arch-cpp11-gcc:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: gcc
+    CXX: g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
 
 build-msvc:
   stage: build
@@ -155,8 +371,8 @@ build-msvc:
     - msvc
   script:
     - call "%VCVARSALL%" x64
-    - mkdir build-msvc
-    - cd build-msvc
+    - mkdir build
+    - cd build
     - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..\
     - cmake --build . --target %CI_PROJECT_NAME%
     
@@ -166,8 +382,8 @@ debug-build-msvc:
     - msvc
   script:
     - call "%VCVARSALL%" x64
-    - mkdir debug-build-msvc
-    - cd debug-build-msvc
+    - mkdir build
+    - cd build
     - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\
     - cmake --build . --target %CI_PROJECT_NAME%
     
@@ -192,4 +408,175 @@ release-test-msvc:
     - mkdir build
     - cd build
     - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake --build . --target check
+
+build-ubuntu-cpp11:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-ubuntu-cpp11:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-ubuntu-cpp11:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  artifacts:
+    paths:
+      - test-build-ubuntu/ccov
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir test-build-ubuntu
+    - cd test-build-ubuntu
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - cmake --build . --target check
+    - cmake --build . --target ccov
+    - cmake --build . --target ccov-report
+
+release-test-ubuntu-cpp11:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
+
+build-arch-cpp11:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+debug-build-arch-cpp11:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build . --target $CI_PROJECT_NAME -- -j8
+
+test-arch-cpp11:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  artifacts:
+    paths:
+      - test-build-arch/ccov
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir test-build-arch
+    - cd test-build-arch
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+    - cmake --build . --target check
+    - cmake --build . --target ccov
+    - cmake --build . --target ccov-report
+
+release-test-arch-cpp11:
+  stage: test
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/abuild:latest
+  dependencies: [] # Disable artifact restoration
+  variables:
+    CC: clang
+    CXX: clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --target check
+
+build-msvc-cpp11:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - call "%VCVARSALL%" x64
+    - mkdir build
+    - cd build
+    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release ..\
+    - cmake --build . --target %CI_PROJECT_NAME%
+    
+debug-build-msvc-cpp11:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - call "%VCVARSALL%" x64
+    - mkdir build
+    - cd build
+    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug ..\
+    - cmake --build . --target %CI_PROJECT_NAME%
+    
+test-msvc-cpp11:
+  stage: test
+  tags:
+    - msvc
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake --build . --target check
+
+release-test-msvc-cpp11:
+  stage: test
+  tags:
+    - msvc
+  dependencies: [] # Disable artifact restoration
+  script:
+    - call "%VCVARSALL%" x64
+    - mkdir build
+    - cd build
+    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check

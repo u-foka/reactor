@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,12 @@
 
 #include "factory_base.hpp"
 
-namespace iws::reactor {
+#include "integer_sequence_polyfil.hpp"
+
+namespace iws {
+namespace reactor {
+
+namespace pf = ::iws::polyfil;
 
 /**
  * @brief default factory implementation
@@ -53,11 +58,11 @@ class factory : public factory_base
 
    template<bool do_pass_name, size_t... Idx>
    factory_result produce_impl(
-         typename std::enable_if<!do_pass_name, const std::string &>::type, std::index_sequence<Idx...>) const;
+         typename std::enable_if<!do_pass_name, const std::string &>::type, pf::index_sequence<Idx...>) const;
 
    template<bool do_pass_name, size_t... Idx>
    factory_result produce_impl(
-         typename std::enable_if<do_pass_name, const std::string &>::type instance, std::index_sequence<Idx...>) const;
+         typename std::enable_if<do_pass_name, const std::string &>::type instance, pf::index_sequence<Idx...>) const;
 };
 
 // ----
@@ -72,13 +77,13 @@ factory<I, T, pass_name, Args...>::factory(Args &&... args)
 template<typename I, typename T, bool pass_name, typename... Args>
 factory_result factory<I, T, pass_name, Args...>::produce(const std::string &instance) const
 {
-   return produce_impl<pass_name>(instance, std::index_sequence_for<Args...>());
+   return produce_impl<pass_name>(instance, pf::index_sequence_for<Args...>());
 }
 
 template<typename I, typename T, bool pass_name, typename... Args>
 template<bool do_pass_name, size_t... Idx>
 factory_result factory<I, T, pass_name, Args...>::produce_impl(
-      typename std::enable_if<!do_pass_name, const std::string &>::type, std::index_sequence<Idx...>) const
+      typename std::enable_if<!do_pass_name, const std::string &>::type, pf::index_sequence<Idx...>) const
 {
    return std::shared_ptr<I>(std::make_shared<T>(std::get<Idx>(_args)...));
 }
@@ -86,11 +91,12 @@ factory_result factory<I, T, pass_name, Args...>::produce_impl(
 template<typename I, typename T, bool pass_name, typename... Args>
 template<bool do_pass_name, size_t... Idx>
 factory_result factory<I, T, pass_name, Args...>::produce_impl(
-      typename std::enable_if<do_pass_name, const std::string &>::type instance, std::index_sequence<Idx...>) const
+      typename std::enable_if<do_pass_name, const std::string &>::type instance, pf::index_sequence<Idx...>) const
 {
    return std::shared_ptr<I>(std::make_shared<T>(instance, std::get<Idx>(_args)...));
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_HPP__

@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,8 +36,12 @@
 #include "type_already_registred_exception.hpp"
 #include "typed_contract.hpp"
 #include "utils.hpp"
+#include "might_shared_mutex.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
+
+namespace pf = ::iws::polyfil;
 
 /**
  * @brief Manages singleton objects referenced with interfaces and names.
@@ -111,9 +115,9 @@ class reactor
    addon_map _addon_map;
    addon_filter_map _addon_filter_map;
 
-   std::shared_mutex _factory_mutex;
-   std::shared_mutex _addon_mutex;
-   std::shared_mutex _object_map_mutex;
+   pf::might_shared_mutex _factory_mutex;
+   pf::might_shared_mutex _addon_mutex;
+   pf::might_shared_mutex _object_map_mutex;
    std::recursive_mutex _object_list_mutex;
    std::recursive_mutex _reset_objects_mutex;
 
@@ -133,7 +137,7 @@ T &reactor::get(const typed_contract<T> &contract)
    const index &id = contract.get_index();
 
    // Try to find an existing instance
-   std::shared_lock<std::shared_mutex> object_map_read_lock(_object_map_mutex);
+   pf::might_shared_lock<pf::might_shared_mutex> object_map_read_lock(_object_map_mutex);
    auto oi = _object_map.find(id);
    if (oi != _object_map.end())
    {
@@ -142,7 +146,7 @@ T &reactor::get(const typed_contract<T> &contract)
    object_map_read_lock.unlock();
 
    // The object has not yet been created, letcs look for it's factory
-   std::shared_lock<std::shared_mutex> factory_read_lock(_factory_mutex);
+   pf::might_shared_lock<pf::might_shared_mutex> factory_read_lock(_factory_mutex);
    auto fi = _factory_map.find(id);
    if (fi == _factory_map.end())
    {
@@ -174,7 +178,7 @@ T &reactor::get(const typed_contract<T> &contract)
    auto obj = selected_factory->produce(id.second).get<T>();
 
    // Also lock the map for actual insert
-   std::unique_lock<std::shared_mutex> object_map_write_lock(_object_map_mutex);
+   std::unique_lock<pf::might_shared_mutex> object_map_write_lock(_object_map_mutex);
    // Store the constructed object
    _object_map.insert(object_map::value_type(id, obj));
    _object_list.push_back(obj);
@@ -203,9 +207,9 @@ typename addon_func_map<T>::type reactor::get_addons(const std::string &instance
 {
    typename addon_func_map<T>::type result;
 
-   for (auto &[prio, item] : _addon_map[index{typeid(T), instance}])
+   for (auto &item : _addon_map[index{typeid(T), instance}])
    {
-      result.insert({prio, dynamic_cast<addon<T> *>(item.get())});
+      result.insert({item.first, dynamic_cast<addon<T> *>(item.second.get())});
    }
 
    for (auto &filter : _addon_filter_map[index{typeid(T), instance}])
@@ -216,6 +220,7 @@ typename addon_func_map<T>::type reactor::get_addons(const std::string &instance
    return result;
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif // __IWS_REACTOR_REACTOR_HPP__

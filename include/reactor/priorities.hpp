@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 #ifndef __IWS_REACTOR_PRIORITIES_HPP__
 #define __IWS_REACTOR_PRIORITIES_HPP__
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief Enumeration holding possible priority levels
@@ -28,6 +29,7 @@ enum priorities
    prio_unittest = 400,
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif // __IWS_REACTOR_PRIORITIES_HPP__

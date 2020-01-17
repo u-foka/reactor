@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@
    #define REACTOR_IMPORT
 #endif
 
-namespace iws::reactor::detail {
+namespace iws {
+namespace reactor {
+namespace detail {
 
 template<typename Container>
 typename Container::iterator find(Container &container, const typename Container::value_type &what)
@@ -69,6 +71,8 @@ void erase_if(ContainerT &items, const PredicateT &predicate)
    }
 }
 
-} // namespace iws::reactor::detail
+} // namespace detail
+} // namespace reactor
+} // namespace iws
 
 #endif // REACTOR_UTILS_HPP

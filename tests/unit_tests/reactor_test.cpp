@@ -12,14 +12,15 @@
 #include <reactor/factory_wrapper.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
+#include <reactor/make_unique_polyfil.hpp>
 
-using namespace std::chrono_literals;
 namespace sph = std::placeholders;
 
 using testing::_;
 using testing::Invoke;
 
 namespace re = iws::reactor;
+namespace pf = iws::polyfil;
 
 struct reactor : public ::testing::Test
 {
@@ -38,7 +39,7 @@ struct reactor : public ::testing::Test
    {
     public:
       MOCK_METHOD1(doit, void(std::string));
-      auto doit_fun() { return std::bind(&mock_test_addon::doit, this, sph::_1); }
+      std::function<void(std::string)> doit_fun() { return std::bind(&mock_test_addon::doit, this, sph::_1); }
    };
 
    template<typename T>
@@ -414,16 +415,16 @@ TEST_F(reactor, addon_simple)
    EXPECT_CALL(addon_mock, doit("testing")).Times(1);
 
    inst->register_addon(
-         std::string(), re::prio_normal, std::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
-   for (auto &[prio, addon] : addons)
+   for (auto &item : addons)
    {
-      EXPECT_EQ(std::type_index(addon->get_type()), std::type_index(typeid(i_test::test_addon)));
-      EXPECT_EQ(std::type_index(addon->get_interface_type()), std::type_index(typeid(i_test)));
+      EXPECT_EQ(std::type_index(item.second->get_type()), std::type_index(typeid(i_test::test_addon)));
+      EXPECT_EQ(std::type_index(item.second->get_interface_type()), std::type_index(typeid(i_test)));
 
-      addon->addon_func("testing");
+      item.second->addon_func("testing");
    }
 
    EXPECT_THROW(inst->unregister_addon(std::string(), re::prio_override, typeid(i_test::test_addon)),
@@ -445,22 +446,22 @@ TEST_F(reactor, addon_filter)
    mock_test_addon addon_mock_norm;
    EXPECT_CALL(addon_mock_norm, doit("testing")).Times(0);
    inst->register_addon(
-         std::string(), re::prio_normal, std::make_unique<re::addon<i_test::test_addon>>(addon_mock_norm.doit_fun()));
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(addon_mock_norm.doit_fun()));
 
    mock_test_addon addon_mock_ut;
    EXPECT_CALL(addon_mock_ut, doit("testing")).Times(1);
    inst->register_addon(
-         std::string(), re::prio_unittest, std::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
+         std::string(), re::prio_unittest, pf::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
 
    mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
    typedef typename re::addon_func_map<i_test::test_addon>::type addon_map_type;
    EXPECT_CALL(addon_filter_mock, mock_func(_)).WillRepeatedly(Invoke([](addon_map_type &addons) {
-      re::detail::erase_if(addons, [](auto &item) { return item.first != re::prio_unittest; });
+      re::detail::erase_if(addons, [](addon_map_type::value_type &item) { return item.first != re::prio_unittest; });
    }));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 
-   auto filter = std::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
+   auto filter = pf::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
    EXPECT_EQ(std::type_index(filter->get_interface_type()), std::type_index(typeid(i_test)));
 
@@ -468,9 +469,9 @@ TEST_F(reactor, addon_filter)
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
-   for (auto &[prio, addon] : addons)
+   for (auto &item : addons)
    {
-      addon->addon_func("testing");
+      item.second->addon_func("testing");
    }
 
    EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_override, typeid(i_test::test_addon)),

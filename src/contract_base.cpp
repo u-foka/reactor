@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 contract_base::contract_base()
       : _r_inst(&r)
@@ -45,4 +46,5 @@ contract_base::~contract_base()
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws

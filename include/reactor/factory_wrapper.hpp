@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
 
 #include <memory>
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 /**
  * @brief factory wrapper for custom factory logic
@@ -66,6 +67,7 @@ factory_result factory_wrapper<I>::produce(const std::string &instance) const
    return _producer(instance);
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_WRAPPER_HPP__

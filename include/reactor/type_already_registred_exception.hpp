@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@
 
 #include "priorities.hpp"
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 class type_already_registred_exception : public std::exception
 {
@@ -36,6 +37,7 @@ class type_already_registred_exception : public std::exception
    mutable std::string msg_buffer;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_TYPE_ALREADY_REGISTRED_EXCEPTION_HPP__

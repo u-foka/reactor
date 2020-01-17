@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,12 @@
 #ifndef __IWS_REACTOR_ADDON_REGISTRATOR_HPP__
 #define __IWS_REACTOR_ADDON_REGISTRATOR_HPP__
 
-namespace iws::reactor {
+#include "make_unique_polyfil.hpp"
+
+namespace iws {
+namespace reactor {
+
+namespace pf = ::iws::polyfil;
 
 template<typename T, bool unregister = false>
 class addon_registrator
@@ -38,7 +43,7 @@ addon_registrator<T, unregister>::addon_registrator(priorities priority, addon<T
       : _name(std::string())
       , _priority(priority)
 {
-   r.register_addon(_name, _priority, std::make_unique<addon<T>>(std::move(inst)));
+   r.register_addon(_name, _priority, pf::make_unique<addon<T>>(std::move(inst)));
 }
 
 template<typename T, bool unregister>
@@ -47,7 +52,7 @@ addon_registrator<T, unregister>::addon_registrator(
       : _name(instance)
       , _priority(priority)
 {
-   r.register_addon(_name, _priority, std::make_unique<addon<T>>(std::move(inst)));
+   r.register_addon(_name, _priority, pf::make_unique<addon<T>>(std::move(inst)));
 }
 
 template<typename T, bool unregister>
@@ -59,6 +64,7 @@ addon_registrator<T, unregister>::~addon_registrator()
    }
 }
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_REGISTRATOR_HPP__

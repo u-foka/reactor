@@ -1,4 +1,4 @@
-// Copyright 2020 Tamás Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2020 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 #ifndef __IWS_REACTOR_ADDON_FILTER_BASE_HPP__
 #define __IWS_REACTOR_ADDON_FILTER_BASE_HPP__
 
-namespace iws::reactor {
+namespace iws {
+namespace reactor {
 
 class addon_filter_base
 {
@@ -25,6 +26,7 @@ class addon_filter_base
    virtual const std::type_info &get_interface_type() const = 0;
 };
 
-} // namespace iws::reactor
+} //namespace reactor
+} // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_FILTER_BASE_HPP__
