@@ -64,7 +64,7 @@ auto res = r.get(example_contract).add(1, 1);
 Let's assume you want to test code that uses i_example and want to replace it's implementation with a mock:
 ```c++
 const reactor::factory_wrapper_registrator<i_example, true> mock_registrator
-   (reactor::prio_unittest, [&](const std::string &) {
+   (reactor::prio_test, [&](const std::string &) {
       return example_mock;
    });
 ```

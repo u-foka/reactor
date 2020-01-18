@@ -26,7 +26,7 @@ enum priorities
    prio_fallback = 100,
    prio_normal = 200,
    prio_override = 300,
-   prio_unittest = 400,
+   prio_test = 400,
 };
 
 } //namespace reactor
