@@ -15,6 +15,8 @@
 #ifndef __IWS_REACTOR_ADDON_FILTER_BASE_HPP__
 #define __IWS_REACTOR_ADDON_FILTER_BASE_HPP__
 
+#include <typeinfo>
+
 namespace iws {
 namespace reactor {
 

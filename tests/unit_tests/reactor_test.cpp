@@ -101,6 +101,26 @@ struct reactor : public ::testing::Test
 
       virtual ~shutdown_checker() { sig_dtor(); }
    };
+
+   template<typename T>
+   struct dependant
+   {
+      T &_dependency;
+      dependant() : _dependency(re::r.get(test_contract<T>()))
+      {}
+   };
+
+   struct dependency
+   {
+   };
+
+   struct recursive_dependency
+   {
+      typedef dependant<recursive_dependency> recursive;
+      recursive &_dependency;
+      recursive_dependency() : _dependency(re::r.get(test_contract<recursive>()))
+      {}
+   };
 };
 
 TEST_F(reactor, instantiate) {}
@@ -532,4 +552,15 @@ TEST_F(reactor, get_version)
 {
    ASSERT_NE(inst->get_version(), std::string());
    std::cout << "Reactor version: " << inst->get_version() << std::endl;
+}
+
+TEST_F(reactor, recursion)
+{
+   re::factory_registrator<dependency, dependency, false, true> reg1(re::prio_normal);
+   re::factory_registrator<dependant<dependency>, dependant<dependency>, false, true> reg2(re::prio_normal);
+   re::factory_registrator<dependant<recursive_dependency>, dependant<recursive_dependency>, false, true> reg3(re::prio_normal);
+   re::factory_registrator<recursive_dependency, recursive_dependency, false, true> reg4(re::prio_normal);
+   
+   EXPECT_NO_THROW(re::r.get(test_contract<dependant<dependency>>()));
+   EXPECT_THROW(re::r.get(test_contract<recursive_dependency>()), std::runtime_error);
 }
