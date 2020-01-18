@@ -69,7 +69,7 @@ class reactor
     * @param priority of the registered factory. Factories with higher priority override ones with lower.
     * @param factory is the factory to be registered
     */
-   void register_factory(const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory);
+   void register_factory(const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory);
    void unregister_factory(const std::string &instance, priorities priority, const std::type_info &type);
 
    void register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon);
@@ -99,14 +99,15 @@ class reactor
    const std::string &get_version() const;
 
  private:
-   typedef std::map<priorities, std::unique_ptr<factory_base>> priorities_map;
+   typedef std::map<priorities, std::shared_ptr<factory_base> > priorities_map; // Must be shared_ptr so get() can safely
+               // release the factory read mutex while creating he object to avoid recursive locking of the shared mutex
    typedef std::map<index, priorities_map> factory_map;
-   typedef std::map<index, std::shared_ptr<void>> object_map;
-   typedef std::vector<std::shared_ptr<void>> object_list;
+   typedef std::map<index, std::shared_ptr<void> > object_map;
+   typedef std::vector<std::shared_ptr<void> > object_list;
    typedef std::vector<index> wip_list;
-   typedef std::multimap<priorities, std::unique_ptr<addon_base>> addon_priority_map;
+   typedef std::multimap<priorities, std::unique_ptr<addon_base> > addon_priority_map;
    typedef std::map<index, addon_priority_map> addon_map;
-   typedef std::multimap<priorities, std::unique_ptr<addon_filter_base>> addon_filter_priority_map;
+   typedef std::multimap<priorities, std::unique_ptr<addon_filter_base> > addon_filter_priority_map;
    typedef std::map<index, addon_filter_priority_map> addon_filter_map;
 
    factory_map _factory_map;
@@ -167,7 +168,10 @@ T &reactor::get(const typed_contract<T> &contract)
    auto fii = fi->second.rbegin();
    // No validity check here, register and unregister factory should make sure that the priority map always
    // has at least one item
-   auto &selected_factory = fii->second;
+   auto selected_factory = fii->second;
+
+   // Unlock to avoid recursive locking of the shared mutex. The factory is held by a shared_ptr so it won't disappear
+   factory_read_lock.unlock();
 
    std::unique_lock<std::recursive_mutex> object_list_lock(_object_list_mutex);
    // Recheck if object were created since we've released the object read lock

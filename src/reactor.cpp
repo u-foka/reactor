@@ -37,7 +37,7 @@ reactor::~reactor()
 }
 
 void reactor::register_factory(
-      const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
+      const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory)
 {
    std::unique_lock<pf::might_shared_mutex> factory_write_lock(_factory_mutex);
 
@@ -58,7 +58,7 @@ void reactor::register_factory(
    if (it_prio == prio_map.end())
    {
       // If there is no, insert the new
-      prio_map.insert({priority, std::move(factory)});
+      prio_map.insert({priority, factory});
    }
    else
    {
