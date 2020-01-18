@@ -143,6 +143,8 @@ T &reactor::get(const typed_contract<T> &contract)
    {
       return *static_cast<T *>(oi->second.get());
    }
+   // Release the shared lock so we (or another thread) can acquire the unique lock on the object map after producing
+   // a new object
    object_map_read_lock.unlock();
 
    // The object has not yet been created, letcs look for it's factory
@@ -175,9 +177,12 @@ T &reactor::get(const typed_contract<T> &contract)
    }
 
    // Call the factory to produce the requested object
+   // Do this while only holding the recursive object list mutex so a constructor is able to recursively call get
+   // to acquire it's dependencies
    auto obj = selected_factory->produce(id.second).get<T>();
 
    // Also lock the map for actual insert
+   // Don't lock earlies so getters of other types can still work while creating the object, and to allow recursion
    std::unique_lock<pf::might_shared_mutex> object_map_write_lock(_object_map_mutex);
    // Store the constructed object
    _object_map.insert(object_map::value_type(id, obj));
