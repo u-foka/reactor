@@ -142,7 +142,7 @@ TEST_F(reactor, priority)
 {
    inst->register_factory(
          std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
-   inst->register_factory(std::string(), re::prio_unittest,
+   inst->register_factory(std::string(), re::prio_test,
          std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
 
    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
@@ -155,7 +155,7 @@ TEST_F(reactor, object_cache)
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
 
-   inst->register_factory(std::string(), re::prio_unittest,
+   inst->register_factory(std::string(), re::prio_test,
          std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
@@ -165,19 +165,19 @@ TEST_F(reactor, unregister)
 {
    inst->register_factory(
          std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
-   inst->register_factory(std::string(), re::prio_unittest,
+   inst->register_factory(std::string(), re::prio_test,
          std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
 
    EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_override, typeid(i_test)),
          re::factory_not_registred_exception);
-   EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_unittest, typeid(test<6>)),
+   EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_test, typeid(test<6>)),
          re::factory_not_registred_exception);
    EXPECT_THROW(
-         inst->unregister_factory("no_inst", re::prio_unittest, typeid(i_test)), re::factory_not_registred_exception);
+         inst->unregister_factory("no_inst", re::prio_test, typeid(i_test)), re::factory_not_registred_exception);
 
    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
 
-   inst->unregister_factory(std::string(), re::prio_unittest, typeid(i_test));
+   inst->unregister_factory(std::string(), re::prio_test, typeid(i_test));
    inst->reset_objects(); // So i_test will be recreated with the effective factory on the next get()
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
@@ -451,12 +451,12 @@ TEST_F(reactor, addon_filter)
    mock_test_addon addon_mock_ut;
    EXPECT_CALL(addon_mock_ut, doit("testing")).Times(1);
    inst->register_addon(
-         std::string(), re::prio_unittest, pf::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
+         std::string(), re::prio_test, pf::make_unique<re::addon<i_test::test_addon>>(addon_mock_ut.doit_fun()));
 
    mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
    typedef typename re::addon_func_map<i_test::test_addon>::type addon_map_type;
    EXPECT_CALL(addon_filter_mock, mock_func(_)).WillRepeatedly(Invoke([](addon_map_type &addons) {
-      re::detail::erase_if(addons, [](addon_map_type::value_type &item) { return item.first != re::prio_unittest; });
+      re::detail::erase_if(addons, [](addon_map_type::value_type &item) { return item.first != re::prio_test; });
    }));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
@@ -465,7 +465,7 @@ TEST_F(reactor, addon_filter)
    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
    EXPECT_EQ(std::type_index(filter->get_interface_type()), std::type_index(typeid(i_test)));
 
-   inst->register_addon_filter(std::string(), re::prio_unittest, std::move(filter));
+   inst->register_addon_filter(std::string(), re::prio_test, std::move(filter));
 
    auto addons = inst->get_addons<i_test::test_addon>();
    EXPECT_EQ(addons.size(), 1ul);
@@ -476,14 +476,14 @@ TEST_F(reactor, addon_filter)
 
    EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_override, typeid(i_test::test_addon)),
          re::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_unittest, typeid(std::string)),
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_test, typeid(std::string)),
          re::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filter("no_inst", re::prio_unittest, typeid(i_test::test_addon)),
+   EXPECT_THROW(inst->unregister_addon_filter("no_inst", re::prio_test, typeid(i_test::test_addon)),
          re::addon_filter_not_registred_exception);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
-   inst->unregister_addon_filter(std::string(), re::prio_unittest, typeid(i_test::test_addon));
+   inst->unregister_addon_filter(std::string(), re::prio_test, typeid(i_test::test_addon));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 }
