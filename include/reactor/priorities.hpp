@@ -29,7 +29,7 @@ enum priorities
    prio_test = 400,
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif // __IWS_REACTOR_PRIORITIES_HPP__

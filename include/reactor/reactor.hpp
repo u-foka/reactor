@@ -31,12 +31,12 @@
 #include "callback_holder.hpp"
 #include "contract_base.hpp"
 #include "factory_base.hpp"
+#include "might_shared_mutex.hpp"
 #include "not_registred_exception.hpp"
 #include "priorities.hpp"
 #include "type_already_registred_exception.hpp"
 #include "typed_contract.hpp"
 #include "utils.hpp"
-#include "might_shared_mutex.hpp"
 
 namespace iws {
 namespace reactor {
@@ -69,7 +69,8 @@ class reactor
     * @param priority of the registered factory. Factories with higher priority override ones with lower.
     * @param factory is the factory to be registered
     */
-   void register_factory(const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory);
+   void register_factory(
+         const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory);
    void unregister_factory(const std::string &instance, priorities priority, const std::type_info &type);
 
    void register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon);
@@ -99,15 +100,17 @@ class reactor
    const std::string &get_version() const;
 
  private:
-   typedef std::map<priorities, std::shared_ptr<factory_base> > priorities_map; // Must be shared_ptr so get() can safely
-               // release the factory read mutex while creating he object to avoid recursive locking of the shared mutex
+   typedef std::map<priorities, std::shared_ptr<factory_base>>
+         priorities_map; // Must be shared_ptr so get() can safely
+                         // release the factory read mutex while creating he object to avoid recursive locking of the
+                         // shared mutex
    typedef std::map<index, priorities_map> factory_map;
-   typedef std::map<index, std::shared_ptr<void> > object_map;
-   typedef std::vector<std::shared_ptr<void> > object_list;
+   typedef std::map<index, std::shared_ptr<void>> object_map;
+   typedef std::vector<std::shared_ptr<void>> object_list;
    typedef std::vector<index> wip_list;
-   typedef std::multimap<priorities, std::unique_ptr<addon_base> > addon_priority_map;
+   typedef std::multimap<priorities, std::unique_ptr<addon_base>> addon_priority_map;
    typedef std::map<index, addon_priority_map> addon_map;
-   typedef std::multimap<priorities, std::unique_ptr<addon_filter_base> > addon_filter_priority_map;
+   typedef std::multimap<priorities, std::unique_ptr<addon_filter_base>> addon_filter_priority_map;
    typedef std::map<index, addon_filter_priority_map> addon_filter_map;
 
    factory_map _factory_map;
@@ -197,7 +200,7 @@ T &reactor::get(const typed_contract<T> &contract)
       auto obj = selected_factory->produce(id.second).get<T>();
 
       _wip_list.pop_back(); // No need to find, it has to be the back item :)
-   
+
       // Also lock the map for actual insert
       // Don't lock earlies so getters of other types can still work while creating the object, and to allow recursion
       std::unique_lock<pf::might_shared_mutex> object_map_write_lock(_object_map_mutex);
@@ -206,8 +209,11 @@ T &reactor::get(const typed_contract<T> &contract)
       _object_list.push_back(obj);
 
       return *static_cast<T *>(obj.get());
-   } catch(...) {
-      if (id == _wip_list.back()) { // Crashed before popping the list..
+   }
+   catch (...)
+   {
+      if (id == _wip_list.back()) // Crashed before popping the list..
+      {
          _wip_list.pop_back(); // Just in case... ;)
       }
       throw;
@@ -248,7 +254,7 @@ typename addon_func_map<T>::type reactor::get_addons(const std::string &instance
    return result;
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif // __IWS_REACTOR_REACTOR_HPP__

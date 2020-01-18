@@ -54,7 +54,7 @@ class factory_base
    const std::type_info &_type;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_BASE_HPP__

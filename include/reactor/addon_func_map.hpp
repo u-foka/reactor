@@ -30,7 +30,7 @@ struct addon_func_map
    typedef std::multimap<priorities, typename std::add_pointer<addon<T>>::type> type;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_FUNC_MAP_HPP__

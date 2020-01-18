@@ -34,7 +34,7 @@ class contract_base
    reactor *_r_inst;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_CONTRACT_BASE_HPP__

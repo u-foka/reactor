@@ -58,11 +58,11 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 namespace iws {
 namespace polyfil {
 
-using std::integer_sequence;
-using std::make_integer_sequence;
 using std::index_sequence;
-using std::make_index_sequence;
 using std::index_sequence_for;
+using std::integer_sequence;
+using std::make_index_sequence;
+using std::make_integer_sequence;
 
 } // namespace polyfil
 } // namespace iws

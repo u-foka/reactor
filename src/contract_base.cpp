@@ -46,5 +46,5 @@ contract_base::~contract_base()
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws

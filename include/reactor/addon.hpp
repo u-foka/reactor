@@ -51,7 +51,7 @@ const std::type_info &addon<T>::get_interface_type() const
    return typeid(typename T::interface);
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_HPP__

@@ -30,11 +30,11 @@ namespace reactor {
  */
 class init
 {
-   public:
+ public:
    init();
    ~init();
 
-   private:
+ private:
    static std::atomic<int> instance_count;
 };
 
@@ -42,7 +42,7 @@ class reactor;
 REACTOR_IMPORT extern reactor &r;
 static const init __init_reactor;
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_R_HPP__

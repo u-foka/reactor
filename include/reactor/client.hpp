@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "contract.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
-#include "contract.hpp"

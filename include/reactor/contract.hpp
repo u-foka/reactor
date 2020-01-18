@@ -62,7 +62,7 @@ const index &contract<T>::get_index() const
    return _index;
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_CONTRACT_HPP__

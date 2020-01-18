@@ -28,7 +28,7 @@ class addon_filter_base
    virtual const std::type_info &get_interface_type() const = 0;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_FILTER_BASE_HPP__

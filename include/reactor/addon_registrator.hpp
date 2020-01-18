@@ -47,8 +47,7 @@ addon_registrator<T, unregister>::addon_registrator(priorities priority, addon<T
 }
 
 template<typename T, bool unregister>
-addon_registrator<T, unregister>::addon_registrator(
-      const std::string &instance, priorities priority, addon<T> &&inst)
+addon_registrator<T, unregister>::addon_registrator(const std::string &instance, priorities priority, addon<T> &&inst)
       : _name(instance)
       , _priority(priority)
 {
@@ -64,7 +63,7 @@ addon_registrator<T, unregister>::~addon_registrator()
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_ADDON_REGISTRATOR_HPP__

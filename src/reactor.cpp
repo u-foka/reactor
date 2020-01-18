@@ -274,5 +274,5 @@ void reactor::unregister_contract(contract_base *cont)
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws

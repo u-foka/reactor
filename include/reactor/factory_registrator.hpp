@@ -17,10 +17,10 @@
 
 #include <string>
 
+#include "factory.hpp"
 #include "priorities.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
-#include "factory.hpp"
 
 namespace iws {
 namespace reactor {
@@ -101,7 +101,7 @@ factory_registrator<I, T, pass_name, unregister>::~factory_registrator()
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_REGISTRATOR_HPP__
