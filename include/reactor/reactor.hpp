@@ -94,6 +94,7 @@ class reactor
 
    bool validate_contracts();
    contract_list unsatisfied_contracts();
+   void test_all_contracts();
 
    bool is_shutting_down();
 
@@ -126,6 +127,7 @@ class reactor
    pf::might_shared_mutex _object_map_mutex;
    std::recursive_mutex _object_list_mutex; // also protects wip_list
    std::recursive_mutex _reset_objects_mutex;
+   std::mutex _contract_mutex;
 
    std::atomic_bool _shutting_down;
 

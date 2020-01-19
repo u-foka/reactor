@@ -91,7 +91,25 @@ struct reactor : public ::testing::Test
       {
       }
 
-      virtual const re::index &get_index() const { return _index; }
+      virtual const re::index &get_index() const override { return _index; }
+      virtual void try_get() override { throw std::logic_error("Not implemented"); }
+   };
+
+   template<typename T>
+   class mock_contract : public re::typed_contract<T>
+   {
+    public:
+      const re::index _index;
+
+      mock_contract(re::reactor *r_inst, const std::string &instance = std::string())
+            : re::typed_contract<T>(r_inst)
+            , _index(typeid(T), instance)
+      {
+      }
+
+      virtual const re::index &get_index() const override { return _index; }
+
+      MOCK_METHOD0(try_get, void());
    };
 
    class shutdown_checker
@@ -548,4 +566,15 @@ TEST_F(reactor, recursion)
 
    EXPECT_NO_THROW(re::r.get(test_contract<dependant<dependency>>()));
    EXPECT_THROW(re::r.get(test_contract<recursive_dependency>()), std::runtime_error);
+}
+
+TEST_F(reactor, test_all_contracts)
+{
+   mock_contract<test<21>> ctr1(inst);
+   mock_contract<test<22>> ctr2(inst);
+
+   EXPECT_CALL(ctr1, try_get()).Times(1);
+   EXPECT_CALL(ctr2, try_get()).Times(1);
+
+   inst->test_all_contracts();
 }
