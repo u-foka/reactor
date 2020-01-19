@@ -10,6 +10,7 @@
 #include <reactor/factory.hpp>
 #include <reactor/factory_registrator.hpp>
 #include <reactor/factory_wrapper.hpp>
+#include <reactor/factory_wrapper_registrator.hpp>
 #include <reactor/make_unique_polyfil.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
@@ -77,6 +78,7 @@ struct reactor : public ::testing::Test
       }
 
       int get_id() { return id; }
+      
    };
 
    template<typename T>
@@ -577,4 +579,20 @@ TEST_F(reactor, test_all_contracts)
    EXPECT_CALL(ctr2, try_get()).Times(1);
 
    inst->test_all_contracts();
+}
+
+TEST_F(reactor, contract_try_get)
+{
+   bool done = false;
+
+   const re::factory_wrapper_registrator<test<23>, true> reg(re::prio_normal, [&done](const std::string &) {
+                  done = true;
+                  return std::make_shared<test<23>>();
+               });
+
+   re::contract<test<23>> ctr;
+
+   ctr.try_get();
+   
+   EXPECT_EQ(done, true);
 }
