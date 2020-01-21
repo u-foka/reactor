@@ -45,5 +45,5 @@ init::~init()
    r.~reactor();
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws

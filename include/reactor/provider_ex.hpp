@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "r.hpp"
-#include "reactor.hpp"
 #include "contract.hpp"
 #include "factory_wrapper_registrator.hpp"
+#include "r.hpp"
+#include "reactor.hpp"

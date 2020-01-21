@@ -27,7 +27,7 @@ namespace reactor {
  */
 typedef std::pair<std::type_index, std::string> index;
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_INDEX_HPP__

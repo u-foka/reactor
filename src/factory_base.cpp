@@ -29,5 +29,5 @@ const std::type_info &factory_base::get_type() const
    return _type;
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws

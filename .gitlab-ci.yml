@@ -51,9 +51,9 @@ test-ubuntu:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
-    - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
+    - cmake --build . --target check -- -j8
+    - cmake --build . --target ccov -- -j8
+    - cmake --build . --target ccov-report -- -j8
 
 release-test-ubuntu:
   stage: test
@@ -68,7 +68,7 @@ release-test-ubuntu:
     - mkdir build
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-arch:
   stage: build
@@ -114,9 +114,9 @@ test-arch:
     - mkdir test-build-arch
     - cd test-build-arch
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
-    - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
+    - cmake --build . --target check -- -j8
+    - cmake --build . --target ccov -- -j8
+    - cmake --build . --target ccov-report -- -j8
 
 release-test-arch:
   stage: test
@@ -131,7 +131,7 @@ release-test-arch:
     - mkdir build
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
     
 build-ubuntu-gcc:
   stage: build
@@ -174,7 +174,7 @@ test-ubuntu-gcc:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 release-test-ubuntu-gcc:
   stage: test
@@ -189,7 +189,7 @@ release-test-ubuntu-gcc:
     - mkdir build
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-arch-gcc:
   stage: build
@@ -232,7 +232,7 @@ test-arch-gcc:
     - mkdir test-build-arch
     - cd test-build-arch
     - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 release-test-arch-gcc:
   stage: test
@@ -247,7 +247,7 @@ release-test-arch-gcc:
     - mkdir build
     - cd build
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-ubuntu-cpp11-gcc:
   stage: build
@@ -290,7 +290,7 @@ test-ubuntu-cpp11-gcc:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 release-test-ubuntu-cpp11-gcc:
   stage: test
@@ -305,7 +305,7 @@ release-test-ubuntu-cpp11-gcc:
     - mkdir build
     - cd build
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-arch-cpp11-gcc:
   stage: build
@@ -348,7 +348,7 @@ test-arch-cpp11-gcc:
     - mkdir test-build-arch
     - cd test-build-arch
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on gcc yet
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 release-test-arch-cpp11-gcc:
   stage: test
@@ -363,7 +363,7 @@ release-test-arch-cpp11-gcc:
     - mkdir build
     - cd build
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-msvc:
   stage: build
@@ -454,9 +454,9 @@ test-ubuntu-cpp11:
     - mkdir test-build-ubuntu
     - cd test-build-ubuntu
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
-    - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
+    - cmake --build . --target check -- -j8
+    - cmake --build . --target ccov -- -j8
+    - cmake --build . --target ccov-report -- -j8
 
 release-test-ubuntu-cpp11:
   stage: test
@@ -471,7 +471,7 @@ release-test-ubuntu-cpp11:
     - mkdir build
     - cd build
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-arch-cpp11:
   stage: build
@@ -517,9 +517,9 @@ test-arch-cpp11:
     - mkdir test-build-arch
     - cd test-build-arch
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
-    - cmake --build . --target check
-    - cmake --build . --target ccov
-    - cmake --build . --target ccov-report
+    - cmake --build . --target check -- -j8
+    - cmake --build . --target ccov -- -j8
+    - cmake --build . --target ccov-report -- -j8
 
 release-test-arch-cpp11:
   stage: test
@@ -534,7 +534,7 @@ release-test-arch-cpp11:
     - mkdir build
     - cd build
     - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release
-    - cmake --build . --target check
+    - cmake --build . --target check -- -j8
 
 build-msvc-cpp11:
   stage: build

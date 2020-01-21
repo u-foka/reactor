@@ -96,7 +96,7 @@ factory_result factory<I, T, pass_name, Args...>::produce_impl(
    return std::shared_ptr<I>(std::make_shared<T>(instance, std::get<Idx>(_args)...));
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_HPP__

@@ -17,10 +17,10 @@
 
 #include <string>
 
+#include "factory_wrapper.hpp"
 #include "priorities.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
-#include "factory_wrapper.hpp"
 
 namespace iws {
 namespace reactor {
@@ -71,7 +71,7 @@ factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
       : _name(std::string())
       , _priority(priority)
 {
-   r.register_factory(_name, _priority, pf::make_unique<factory_wrapper<I>>(producer));
+   r.register_factory(_name, _priority, std::make_shared<factory_wrapper<I>>(producer));
 }
 
 template<typename I, bool unregister>
@@ -80,7 +80,7 @@ factory_wrapper_registrator<I, unregister>::factory_wrapper_registrator(
       : _name(instance)
       , _priority(priority)
 {
-   r.register_factory(_name, _priority, pf::make_unique<factory_wrapper<I>>(producer));
+   r.register_factory(_name, _priority, std::make_shared<factory_wrapper<I>>(producer));
 }
 
 template<typename I, bool unregister>
@@ -92,7 +92,7 @@ factory_wrapper_registrator<I, unregister>::~factory_wrapper_registrator()
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_WRAPPER_REGISTRATOR_HPP__

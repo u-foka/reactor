@@ -37,7 +37,7 @@ class type_already_registred_exception : public std::exception
    mutable std::string msg_buffer;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_TYPE_ALREADY_REGISTRED_EXCEPTION_HPP__

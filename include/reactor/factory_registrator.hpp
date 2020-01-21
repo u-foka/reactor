@@ -17,11 +17,10 @@
 
 #include <string>
 
+#include "factory.hpp"
 #include "priorities.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
-#include "factory.hpp"
-#include "make_unique_polyfil.hpp"
 
 namespace iws {
 namespace reactor {
@@ -79,7 +78,7 @@ factory_registrator<I, T, pass_name, unregister>::factory_registrator(priorities
       , _priority(priority)
 {
    r.register_factory(
-         _name, _priority, pf::make_unique<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
+         _name, _priority, std::make_shared<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
 }
 
 template<typename I, typename T, bool pass_name, bool unregister>
@@ -90,7 +89,7 @@ factory_registrator<I, T, pass_name, unregister>::factory_registrator(
       , _priority(priority)
 {
    r.register_factory(
-         _name, _priority, pf::make_unique<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
+         _name, _priority, std::make_shared<factory<I, T, pass_name, Args...>>(std::forward<Args>(args)...));
 }
 
 template<typename I, typename T, bool pass_name, bool unregister>
@@ -102,7 +101,7 @@ factory_registrator<I, T, pass_name, unregister>::~factory_registrator()
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_REGISTRATOR_HPP__

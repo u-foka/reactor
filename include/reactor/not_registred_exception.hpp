@@ -62,7 +62,7 @@ class addon_filter_not_registred_exception : public not_registred_exception
    static const std::string category;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_NOT_REGISTRED_EXCEPTION_HPP__

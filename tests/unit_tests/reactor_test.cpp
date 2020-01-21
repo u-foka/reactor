@@ -10,9 +10,10 @@
 #include <reactor/factory.hpp>
 #include <reactor/factory_registrator.hpp>
 #include <reactor/factory_wrapper.hpp>
+#include <reactor/factory_wrapper_registrator.hpp>
+#include <reactor/make_unique_polyfil.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
-#include <reactor/make_unique_polyfil.hpp>
 
 namespace sph = std::placeholders;
 
@@ -77,6 +78,7 @@ struct reactor : public ::testing::Test
       }
 
       int get_id() { return id; }
+      
    };
 
    template<typename T>
@@ -91,7 +93,25 @@ struct reactor : public ::testing::Test
       {
       }
 
-      virtual const re::index &get_index() const { return _index; }
+      virtual const re::index &get_index() const override { return _index; }
+      virtual void try_get() override { throw std::logic_error("Not implemented"); }
+   };
+
+   template<typename T>
+   class mock_contract : public re::typed_contract<T>
+   {
+    public:
+      const re::index _index;
+
+      mock_contract(re::reactor *r_inst, const std::string &instance = std::string())
+            : re::typed_contract<T>(r_inst)
+            , _index(typeid(T), instance)
+      {
+      }
+
+      virtual const re::index &get_index() const override { return _index; }
+
+      MOCK_METHOD0(try_get, void());
    };
 
    class shutdown_checker
@@ -101,77 +121,91 @@ struct reactor : public ::testing::Test
 
       virtual ~shutdown_checker() { sig_dtor(); }
    };
+
+   template<typename T>
+   struct dependant
+   {
+      T &_dependency;
+      dependant()
+            : _dependency(re::r.get(test_contract<T>()))
+      {
+      }
+   };
+
+   struct dependency
+   {
+   };
+
+   struct recursive_dependency
+   {
+      typedef dependant<recursive_dependency> recursive;
+      recursive &_dependency;
+      recursive_dependency()
+            : _dependency(re::r.get(test_contract<recursive>()))
+      {
+      }
+   };
 };
 
 TEST_F(reactor, instantiate) {}
 
 TEST_F(reactor, basic)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<test<0>, test<0>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<0>, test<0>, false>>());
 
    EXPECT_EQ(0, inst->get(test_contract<test<0>>()).get_id());
 }
 
 TEST_F(reactor, missing)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<test<1>, test<1>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<1>, test<1>, false>>());
 
    EXPECT_THROW(inst->get(test_contract<test<-1>>()).get_id(), re::factory_not_registred_exception);
 }
 
 TEST_F(reactor, interface)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<2>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<2>, false>>());
 
    EXPECT_EQ(2, inst->get(test_contract<i_test>()).get_id());
 }
 
 TEST_F(reactor, throw_reregister)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<3>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<3>, false>>());
    EXPECT_THROW(inst->register_factory(std::string(), re::prio_normal,
-                      std::unique_ptr<re::factory_base>(new re::factory<i_test, test<4>, false>())),
+                      std::shared_ptr<re::factory_base>(new re::factory<i_test, test<4>, false>())),
          re::type_already_registred_exception);
 }
 
 TEST_F(reactor, priority)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
-   inst->register_factory(std::string(), re::prio_test,
-         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<5>, false>>());
+   inst->register_factory(std::string(), re::prio_test, std::make_shared<re::factory<i_test, test<6>, false>>());
 
    EXPECT_EQ(6, inst->get(test_contract<i_test>()).get_id());
 }
 
 TEST_F(reactor, object_cache)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<5>, false>>());
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
 
-   inst->register_factory(std::string(), re::prio_test,
-         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
+   inst->register_factory(std::string(), re::prio_test, std::make_shared<re::factory<i_test, test<6>, false>>());
 
    EXPECT_EQ(5, inst->get(test_contract<i_test>()).get_id());
 }
 
 TEST_F(reactor, unregister)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<5>, false>()));
-   inst->register_factory(std::string(), re::prio_test,
-         std::unique_ptr<re::factory_base>(new re::factory<i_test, test<6>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<5>, false>>());
+   inst->register_factory(std::string(), re::prio_test, std::make_shared<re::factory<i_test, test<6>, false>>());
 
    EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_override, typeid(i_test)),
          re::factory_not_registred_exception);
-   EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_test, typeid(test<6>)),
-         re::factory_not_registred_exception);
+   EXPECT_THROW(
+         inst->unregister_factory(std::string(), re::prio_test, typeid(test<6>)), re::factory_not_registred_exception);
    EXPECT_THROW(
          inst->unregister_factory("no_inst", re::prio_test, typeid(i_test)), re::factory_not_registred_exception);
 
@@ -185,10 +219,8 @@ TEST_F(reactor, unregister)
 
 TEST_F(reactor, named_factory)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<7>, false>()));
-   inst->register_factory(
-         "named", re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<8>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<7>, false>>());
+   inst->register_factory("named", re::prio_normal, std::make_shared<re::factory<i_test, test<8>, false>>());
 
    EXPECT_EQ(7, inst->get(test_contract<i_test>()).get_id());
    EXPECT_EQ(8, inst->get(test_contract<i_test>("named")).get_id());
@@ -199,8 +231,7 @@ TEST_F(reactor, named_factory)
 
 TEST_F(reactor, named_objects_differ)
 {
-   inst->register_factory(
-         std::string(), re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<i_test, test<9>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<9>, false>>());
 
    EXPECT_NE(&inst->get(test_contract<i_test>()), &inst->get(test_contract<i_test>("first")));
    EXPECT_NE(&inst->get(test_contract<i_test>("first")), &inst->get(test_contract<i_test>("second")));
@@ -209,7 +240,7 @@ TEST_F(reactor, named_objects_differ)
 TEST_F(reactor, instance_name)
 {
    inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(
+         std::shared_ptr<re::factory_base>(
                new re::factory<test<10, const std::string &>, test<10, const std::string &>, true>()));
 
    EXPECT_EQ("first", std::get<0>(inst->get(test_contract<test<10, const std::string &>>("first")).args));
@@ -221,10 +252,10 @@ TEST_F(reactor, passed_args)
    typedef test<11, const std::string &> test11;
    typedef test<12, const std::string &, const std::string &> test12;
 
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test11, test11, false, std::string>("arg1")));
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test12, test12, true, std::string>("arg2")));
+   inst->register_factory(
+         std::string(), re::prio_normal, std::make_shared<re::factory<test11, test11, false, std::string>>("arg1"));
+   inst->register_factory(
+         std::string(), re::prio_normal, std::make_shared<re::factory<test12, test12, true, std::string>>("arg2"));
 
    EXPECT_EQ("arg1", std::get<0>(inst->get(test_contract<test11>()).args));
    EXPECT_EQ("", std::get<0>(inst->get(test_contract<test12>()).args));
@@ -251,7 +282,7 @@ TEST_F(reactor, passed_args_global)
 TEST_F(reactor, factory_wrapper)
 {
    inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(
+         std::shared_ptr<re::factory_base>(
                new re::factory_wrapper<test<15, const std::string &, int>>([](const std::string &instance) {
                   return std::make_shared<test<15, const std::string &, int>>(instance, 42);
                })));
@@ -283,8 +314,7 @@ TEST_F(reactor, concurrent_get)
 
    test_contract<test<19>> ct;
 
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test<19>, test<19>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<19>, test<19>, false>>());
 
    auto fun = [&]() { return &inst->get(ct); };
 
@@ -316,8 +346,7 @@ TEST_F(reactor, concurrent_get)
 
 TEST_F(reactor, holder)
 {
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test<20>, test<20>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<20>, test<20>, false>>());
 
    auto &obj = inst->get(test_contract<test<20>>());
    auto holder = inst->get_ptr(obj);
@@ -339,8 +368,7 @@ TEST_F(reactor, contract)
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test<23>, test<23>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<23>, test<23>, false>>());
 
    EXPECT_TRUE(inst->validate_contracts());
    EXPECT_EQ(0ul, inst->unsatisfied_contracts().size());
@@ -351,8 +379,7 @@ TEST_F(reactor, contract)
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test<24>, test<24>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<24>, test<24>, false>>());
 
    EXPECT_TRUE(inst->validate_contracts());
    EXPECT_EQ(0ul, inst->unsatisfied_contracts().size());
@@ -368,14 +395,12 @@ TEST_F(reactor, contract)
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(2ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory(
-         "other", re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<test<25>, test<25>, false>()));
+   inst->register_factory("other", re::prio_normal, std::make_shared<re::factory<test<25>, test<25>, false>>());
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(2ul, inst->unsatisfied_contracts().size());
 
-   inst->register_factory(
-         "named", re::prio_normal, std::unique_ptr<re::factory_base>(new re::factory<test<25>, test<25>, false>()));
+   inst->register_factory("named", re::prio_normal, std::make_shared<re::factory<test<25>, test<25>, false>>());
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
@@ -386,8 +411,7 @@ TEST_F(reactor, contract)
    EXPECT_EQ(2ul, inst->unsatisfied_contracts().size());
 
    // Satisfy named by default factory
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<test<25>, test<25>, false>()));
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<25>, test<25>, false>>());
 
    EXPECT_FALSE(inst->validate_contracts());
    EXPECT_EQ(1ul, inst->unsatisfied_contracts().size());
@@ -519,8 +543,8 @@ TEST_F(reactor, is_shutting_down)
 {
    EXPECT_EQ(inst->is_shutting_down(), false);
 
-   inst->register_factory(std::string(), re::prio_normal,
-         std::unique_ptr<re::factory_base>(new re::factory<shutdown_checker, shutdown_checker, false>()));
+   inst->register_factory(
+         std::string(), re::prio_normal, std::make_shared<re::factory<shutdown_checker, shutdown_checker, false>>());
 
    inst->get(test_contract<shutdown_checker>()).sig_dtor.connect([&] { EXPECT_EQ(inst->is_shutting_down(), true); });
 
@@ -532,4 +556,43 @@ TEST_F(reactor, get_version)
 {
    ASSERT_NE(inst->get_version(), std::string());
    std::cout << "Reactor version: " << inst->get_version() << std::endl;
+}
+
+TEST_F(reactor, recursion)
+{
+   re::factory_registrator<dependency, dependency, false, true> reg1(re::prio_normal);
+   re::factory_registrator<dependant<dependency>, dependant<dependency>, false, true> reg2(re::prio_normal);
+   re::factory_registrator<dependant<recursive_dependency>, dependant<recursive_dependency>, false, true> reg3(
+         re::prio_normal);
+   re::factory_registrator<recursive_dependency, recursive_dependency, false, true> reg4(re::prio_normal);
+
+   EXPECT_NO_THROW(re::r.get(test_contract<dependant<dependency>>()));
+   EXPECT_THROW(re::r.get(test_contract<recursive_dependency>()), std::runtime_error);
+}
+
+TEST_F(reactor, test_all_contracts)
+{
+   mock_contract<test<21>> ctr1(inst);
+   mock_contract<test<22>> ctr2(inst);
+
+   EXPECT_CALL(ctr1, try_get()).Times(1);
+   EXPECT_CALL(ctr2, try_get()).Times(1);
+
+   inst->test_all_contracts();
+}
+
+TEST_F(reactor, contract_try_get)
+{
+   bool done = false;
+
+   const re::factory_wrapper_registrator<test<23>, true> reg(re::prio_normal, [&done](const std::string &) {
+                  done = true;
+                  return std::make_shared<test<23>>();
+               });
+
+   re::contract<test<23>> ctr;
+
+   ctr.try_get();
+   
+   EXPECT_EQ(done, true);
 }

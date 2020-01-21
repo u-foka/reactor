@@ -18,6 +18,7 @@
 #include "typed_contract.hpp"
 
 #include "index.hpp"
+#include "reactor.hpp"
 
 namespace iws {
 namespace reactor {
@@ -30,6 +31,7 @@ class contract : public typed_contract<T>
    contract(reactor *r_inst, const std::string &instance = std::string());
    virtual ~contract();
    virtual const index &get_index() const override;
+   virtual void try_get() override;
 
  private:
    const index _index;
@@ -62,7 +64,13 @@ const index &contract<T>::get_index() const
    return _index;
 }
 
-} //namespace reactor
+template<typename T>
+void contract<T>::try_get()
+{
+   contract_base::_r_inst->get(*this);
+}
+
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_CONTRACT_HPP__

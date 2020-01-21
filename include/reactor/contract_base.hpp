@@ -29,12 +29,13 @@ class contract_base
    explicit contract_base(reactor *r_inst);
    virtual ~contract_base();
    virtual const index &get_index() const = 0;
+   virtual void try_get() = 0;
 
- private:
-   reactor *_r_inst;
+ protected:
+   reactor *const _r_inst;
 };
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_CONTRACT_BASE_HPP__

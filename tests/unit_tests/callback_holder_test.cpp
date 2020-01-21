@@ -155,11 +155,11 @@ TEST_F(callback_holder, forward_correct)
    const std::string txt("here I am");
    auto to_be_moved = pf::make_unique<std::string>(txt);
    std::string callback_arg;
-   EXPECT_CALL(mock, moved_arg(_)).WillRepeatedly(Invoke([&](std::unique_ptr<std::string> &&arg){
+   EXPECT_CALL(mock, moved_arg(_)).WillRepeatedly(Invoke([&](std::unique_ptr<std::string> &&arg) {
       std::unique_ptr<std::string> moved(std::move(arg));
       callback_arg = *moved;
    }));
-   
+
    iws::callback_holder<std::unique_ptr<std::string> &&> cb;
    cb.connect(moved_arg_cb);
 
@@ -168,12 +168,12 @@ TEST_F(callback_holder, forward_correct)
    EXPECT_EQ(callback_arg, txt);
 
    to_be_moved = pf::make_unique<std::string>(txt); // Re-initialize the pointer
-   cb.connect(moved_arg_cb); // Connect the callback second time
+   cb.connect(moved_arg_cb);                        // Connect the callback second time
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-   EXPECT_EXIT((cb(std::move(to_be_moved)),exit(0)),::testing::KilledBySignal(SIGSEGV),".*");
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+   EXPECT_EXIT((cb(std::move(to_be_moved)), exit(0)), ::testing::KilledBySignal(SIGSEGV), ".*");
 #else
-   EXPECT_DEATH_IF_SUPPORTED((cb(std::move(to_be_moved)),exit(0)),".*");
+   EXPECT_DEATH_IF_SUPPORTED((cb(std::move(to_be_moved)), exit(0)), ".*");
 #endif
 }
 

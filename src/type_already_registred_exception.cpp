@@ -37,5 +37,5 @@ const char *reactor::type_already_registred_exception::what() const noexcept
    return msg_buffer.c_str();
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws

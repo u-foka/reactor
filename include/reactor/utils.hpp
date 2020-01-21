@@ -26,9 +26,9 @@
 
 /* Windows dllimport (exports are handled by cmake) */
 #if !defined(REACTOR_LIBRARY) && !defined(REACTOR_STATIC) && defined(_WIN32)
-   #define REACTOR_IMPORT __declspec(dllimport)
+#define REACTOR_IMPORT __declspec(dllimport)
 #else
-   #define REACTOR_IMPORT
+#define REACTOR_IMPORT
 #endif
 
 namespace iws {

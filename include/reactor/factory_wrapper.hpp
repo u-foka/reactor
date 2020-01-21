@@ -67,7 +67,7 @@ factory_result factory_wrapper<I>::produce(const std::string &instance) const
    return _producer(instance);
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
 
 #endif //__IWS_REACTOR_FACTORY_WRAPPER_HPP__

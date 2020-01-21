@@ -54,5 +54,5 @@ addon_filter_not_registred_exception::addon_filter_not_registred_exception(
 {
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws

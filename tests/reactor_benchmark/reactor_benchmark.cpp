@@ -5,8 +5,12 @@
 
 using namespace iws::reactor;
 
-class i_empty {};
-class empty : public i_empty {};
+class i_empty
+{
+};
+class empty : public i_empty
+{
+};
 
 static void BM_Reactor_CreateObj(benchmark::State &state)
 {
@@ -32,7 +36,7 @@ static void BM_Reactor_CreateAndAccess(benchmark::State &state)
       r.reset_objects();
       i_empty &created = r.get(contract);
       benchmark::DoNotOptimize(created);
-      
+
       i_empty &obj = r.get(contract);
       benchmark::DoNotOptimize(obj);
    }
@@ -49,7 +53,7 @@ static void BM_Reactor_CreateAndAccessHolder(benchmark::State &state)
       r.reset_objects();
       i_empty &created = r.get(contract);
       benchmark::DoNotOptimize(created);
-      
+
       std::shared_ptr<i_empty> obj = r.get_ptr(r.get(contract));
       benchmark::DoNotOptimize(obj);
    }

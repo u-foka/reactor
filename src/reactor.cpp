@@ -37,7 +37,7 @@ reactor::~reactor()
 }
 
 void reactor::register_factory(
-      const std::string &instance, priorities priority, std::unique_ptr<factory_base> &&factory)
+      const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory)
 {
    std::unique_lock<pf::might_shared_mutex> factory_write_lock(_factory_mutex);
 
@@ -58,7 +58,7 @@ void reactor::register_factory(
    if (it_prio == prio_map.end())
    {
       // If there is no, insert the new
-      prio_map.insert({priority, std::move(factory)});
+      prio_map.insert({priority, factory});
    }
    else
    {
@@ -211,6 +211,8 @@ void reactor::reset_objects()
 
 bool reactor::validate_contracts()
 {
+   std::unique_lock<std::mutex> contract_lock(_contract_mutex);
+
    for (auto it = _contract_list.begin(); it != _contract_list.end(); ++it)
    {
       auto id = (*it)->get_index();
@@ -230,6 +232,8 @@ bool reactor::validate_contracts()
 
 reactor::contract_list reactor::unsatisfied_contracts()
 {
+   std::unique_lock<std::mutex> contract_lock(_contract_mutex);
+
    contract_list list;
 
    for (auto it = _contract_list.begin(); it != _contract_list.end(); ++it)
@@ -250,6 +254,16 @@ reactor::contract_list reactor::unsatisfied_contracts()
    return list;
 }
 
+void reactor::test_all_contracts()
+{
+   std::unique_lock<std::mutex> contract_lock(_contract_mutex);
+
+   for (auto &item : _contract_list)
+   {
+      item->try_get();
+   }
+}
+
 bool reactor::is_shutting_down()
 {
    return _shutting_down;
@@ -262,11 +276,15 @@ const std::string &reactor::get_version() const
 
 void reactor::register_contract(contract_base *cont)
 {
+   std::unique_lock<std::mutex> contract_lock(_contract_mutex);
+
    _contract_list.push_back(cont);
 }
 
 void reactor::unregister_contract(contract_base *cont)
 {
+   std::unique_lock<std::mutex> contract_lock(_contract_mutex);
+
    auto it = find(_contract_list.begin(), _contract_list.end(), cont);
    if (it != _contract_list.end())
    {
@@ -274,5 +292,5 @@ void reactor::unregister_contract(contract_base *cont)
    }
 }
 
-} //namespace reactor
+} // namespace reactor
 } // namespace iws
