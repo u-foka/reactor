@@ -12,6 +12,7 @@
 #include <reactor/factory_wrapper.hpp>
 #include <reactor/factory_wrapper_registrator.hpp>
 #include <reactor/make_unique_polyfil.hpp>
+#include <reactor/pulley.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
@@ -32,7 +33,11 @@ struct reactor : public ::testing::Test
    {
    }
 
-   void SetUp() { inst = new re::reactor(); }
+   void SetUp()
+   {
+      re::r.reset_objects();
+      inst = new re::reactor();
+   }
 
    void TearDown() { delete inst; }
 
@@ -78,7 +83,6 @@ struct reactor : public ::testing::Test
       }
 
       int get_id() { return id; }
-      
    };
 
    template<typename T>
@@ -293,16 +297,27 @@ TEST_F(reactor, factory_wrapper)
 
 TEST_F(reactor, registrator)
 {
+   try
    {
-      re::factory_registrator<i_test, test<16>, false, true> registrator(re::prio_normal);
-   }
-   {
-      re::factory_registrator<i_test, test<17>, false, false> registrator(re::prio_normal);
-      EXPECT_EQ(17, re::r.get(test_contract<i_test>()).get_id());
-   }
+      {
+         re::factory_registrator<i_test, test<16>, false, true> registrator(re::prio_normal);
+         EXPECT_EQ(16, re::r.get(test_contract<i_test>()).get_id());
+      }
+      re::r.reset_objects();
+      {
+         re::factory_registrator<i_test, test<17>, false, false> registrator(re::prio_normal);
+         EXPECT_EQ(17, re::r.get(test_contract<i_test>()).get_id());
+      }
 
-   auto problematic = []() { re::factory_registrator<i_test, test<18>, false, true> registrator(re::prio_normal); };
-   EXPECT_THROW(problematic(), re::type_already_registred_exception);
+      auto problematic = []() { re::factory_registrator<i_test, test<18>, false, true> registrator(re::prio_normal); };
+      EXPECT_THROW(problematic(), re::type_already_registred_exception);
+
+      re::r.unregister_factory(std::string(), re::prio_normal, typeid(i_test));
+   }
+   catch (...)
+   {
+      re::r.unregister_factory(std::string(), re::prio_normal, typeid(i_test));
+   }
 }
 
 TEST_F(reactor, concurrent_get)
@@ -585,14 +600,26 @@ TEST_F(reactor, contract_try_get)
 {
    bool done = false;
 
-   const re::factory_wrapper_registrator<test<23>, true> reg(re::prio_normal, [&done](const std::string &) {
-                  done = true;
-                  return std::make_shared<test<23>>();
-               });
+   const re::factory_wrapper_registrator<test<27>, true> reg(re::prio_normal, [&done](const std::string &) {
+      done = true;
+      return std::make_shared<test<27>>();
+   });
 
-   re::contract<test<23>> ctr;
+   re::contract<test<27>> ctr;
 
    ctr.try_get();
-   
+
    EXPECT_EQ(done, true);
+}
+
+TEST_F(reactor, pulley)
+{
+   re::factory_registrator<i_test, test<28>, false, true> reg28(re::prio_normal);
+   re::factory_registrator<i_test, test<29>, false, true> reg29("named", re::prio_normal);
+
+   re::pulley<i_test> p28;
+   // re::pulley<i_test, "named"> p29;
+
+   EXPECT_EQ(28, p28->get_id());
+   // EXPECT_EQ(29, p29->get_id());
 }
