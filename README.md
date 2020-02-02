@@ -19,7 +19,7 @@ Example usage
 
 ### Registering a service
 First you need to define the interface of the service:
-```c++
+```cpp
 class i_example
 {
  public:
@@ -30,7 +30,7 @@ class i_example
 ```
 
 Then define the implementation:
-```c++
+```cpp
 class example_impl : public i_example
 {
  public:
@@ -42,7 +42,7 @@ class example_impl : public i_example
 ```
 
 And finally register the a factory that instantiates the implementation when a service is requested for your interface:
-```c++
+```cpp
 static const reactor::factory_registrator<i_example, example_impl> registrator(reactor::prio_normal);
 ```
 
@@ -50,19 +50,19 @@ static const reactor::factory_registrator<i_example, example_impl> registrator(r
 
 First you have to declare a contract to the interface you want to use, preferably it's a global variable in the
 compilation unit where the interface will be used:
-```c++
+```cpp
 static const reactor::contract<i_example> example_contract;
 ```
 
 Then wherever you need to use i_example you can acquire a reference to backing service using:
-```c++
+```cpp
 auto res = r.get(example_contract).add(1, 1);
 ```
 
 ### Override a service
 
 Let's assume you want to test code that uses i_example and want to replace it's implementation with a mock:
-```c++
+```cpp
 const reactor::factory_wrapper_registrator<i_example, true> mock_registrator
    (reactor::prio_test, [&](const std::string &) {
       return example_mock;
