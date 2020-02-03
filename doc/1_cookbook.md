@@ -209,8 +209,32 @@ will also work.
 
 # Named instances
 
-# Priorities
+There are cases when you need multiple instances of the same service for different purposes. To support this use-case reactor supports named instances.
+
+To acquire a named instance, you can add the name to your contracts constructor.
+
+```cpp
+static const reactor::contract<i_example> instance1_contract("instance1");
+```
+
+When there is no instance name is provided, the default instance is referenced (that is identified by an empty string)
+
+You can also provide an instance specific implementation by registering your factory with instance name.
+
+```cpp
+static const reactor::factory_registrator<i_example, example_impl> registrator("instance1", reactor::prio_normal);
+```
+
+While getting an named instance, reactor first looks for a name specific registration and if it doesn't exists then tries to the default factory.
+
+More about named instances in the \ref advanced_named_instance section on the \ref advanced page.
 
 # Custom factories
+
+
+
+# Priorities
+
+
 
 # Addons
