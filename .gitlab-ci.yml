@@ -70,6 +70,20 @@ release-test-ubuntu:
     - cmake ../ -DCMAKE_BUILD_TYPE=Release
     - cmake --build . --target check -- -j8
 
+doc:
+  stage: build
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  artifacts:
+    paths:
+      - doc/doc
+  script:
+    - mkdir doc
+    - cd doc
+    - cmake ../
+    - cmake --build . --target doc
+
 build-arch:
   stage: build
   tags:
