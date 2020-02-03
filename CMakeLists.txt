@@ -11,7 +11,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
 else()
   # Detect version from git tag
   execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                  COMMAND git describe --match "v*"
+                  COMMAND git describe --all --match "v*"
                   OUTPUT_VARIABLE PROJECT_VERSION)
   string(REGEX REPLACE "^v(.+)\n$" "\\1" PROJECT_VERSION "${PROJECT_VERSION}")
   string(REGEX REPLACE "^([(0-9)]+\\.[(0-9)]+).*$" "\\1" PROJECT_SOVERSION "${PROJECT_VERSION}")
