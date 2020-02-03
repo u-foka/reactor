@@ -77,10 +77,10 @@ doc:
   image: registry.iwstudio.hu/iws/ubuild:latest
   artifacts:
     paths:
-      - doc/doc
+      - build-doc/doc
   script:
-    - mkdir doc
-    - cd doc
+    - mkdir build-doc
+    - cd build-doc
     - cmake ../
     - cmake --build . --target doc
 
