@@ -227,14 +227,38 @@ static const reactor::factory_registrator<i_example, example_impl> registrator("
 
 While getting an named instance, reactor first looks for a name specific registration and if it doesn't exists then tries to the default factory.
 
-More about named instances in the \ref advanced_named_instance section on the \ref advanced page.
+More about named instances (like how to pass the name into your constructor) in the \ref advanced_named_instance section on the \ref advanced page.
 
 # Custom factories
 
+When you need to have more precise control over the creation of your instance, you can register a factory wrapper and provide your own code to create the new object.
 
+```cpp
+const reactor::factory_wrapper_registrator<i_example> registrator(reactor::prio_normal,
+   [&](const std::string &name) {
+      std::cout << "Creating example with instance name" << name << std::endl;
+      auto obj = std::make_shared<example>();
+
+      // do any necessary initialization on obj before returning
+
+      return obj;
+   });
+```
+
+_Note that it also gets the instance name that is requested from reactor, so you can also incorporate it into your creation logic_
 
 # Priorities
 
+You can register your factories for the same interface with different priorities (one interface-name-priority combination can only registered once) and always the factory with the highest priority will be used to produce a new instance if necessary.
 
+(existing objects are preserved when registering an override factory, so if the object is already created the override might be ineffective)
+
+So in the below example the first implementation will be used.
+```cpp
+static const reactor::factory_registrator<i_example, example_impl_first> registrator(reactor::prio_override);
+static const reactor::factory_registrator<i_example, example_impl_second> registrator(reactor::prio_normal);
+
+static const reactor::contract<i_example> example_contract;
+```
 
 # Addons
