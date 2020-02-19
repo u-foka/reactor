@@ -262,3 +262,36 @@ static const reactor::contract<i_example> example_contract;
 ```
 
 # Addons
+
+In your interfaces, you can define addons:
+
+```cpp
+class i_example
+{
+ public:
+   struct example_addon {
+      typedef i_example interface;
+      typedef std::function<void()> func;
+   };
+```
+
+To acquire the addons registered for you:
+```cpp
+auto example_addons = r.get_addons<example_addon>();
+```
+
+You'll get an `std::multimap<priority, addon<T>>` with all the addons registered for your interface. You can choose to only apply the addon(s) with the highest priority, or iterate through all of them from the lowest to the highest.
+
+For example:
+```cpp
+for (auto &[prio, addon] : example_addons)
+{
+   addon->addon_func();
+}
+```
+
+To register an addon you can use the registrator:
+
+```cpp
+static const reactor::addon_registrator<i_example::example_addon> example_addon_registrator(reactor::prio_normal, {your_functor});
+```
