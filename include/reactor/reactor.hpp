@@ -80,6 +80,8 @@ class reactor
    void unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type);
 
    template<typename T>
+   bool instance_exists(const typed_contract<T> &contract);
+   template<typename T>
    T &get(const typed_contract<T> &contract);
    template<typename T>
    std::shared_ptr<T> get_ptr(T &obj);
@@ -136,6 +138,18 @@ class reactor
 };
 
 // ----
+
+template<typename T>
+bool reactor::instance_exists(const typed_contract<T> &contract)
+{
+   const index &id = contract.get_index();
+
+   // Try to find an existing instance
+   pf::might_shared_lock<pf::might_shared_mutex> object_map_read_lock(_object_map_mutex);
+   auto oi = _object_map.find(id);
+
+   return oi != _object_map.end();
+}
 
 template<typename T>
 T &reactor::get(const typed_contract<T> &contract)
