@@ -623,3 +623,23 @@ TEST_F(reactor, pulley)
    EXPECT_EQ(28, p28->get_id());
    // EXPECT_EQ(29, p29->get_id());
 }
+
+TEST_F(reactor, instance_exists)
+{
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<30>, test<30>, false>>());
+   inst->register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<test<31>, test<31>, false>>());
+
+   test_contract<test<30>> ctr30;
+   test_contract<test<31>> ctr31;
+
+   EXPECT_FALSE(inst->instance_exists(ctr30));
+   EXPECT_FALSE(inst->instance_exists(ctr31));
+   
+   EXPECT_EQ(30, inst->get(ctr30).get_id());
+   EXPECT_TRUE(inst->instance_exists(ctr30));
+   EXPECT_FALSE(inst->instance_exists(ctr31));
+
+   EXPECT_EQ(31, inst->get(ctr31).get_id());
+   EXPECT_TRUE(inst->instance_exists(ctr30));
+   EXPECT_TRUE(inst->instance_exists(ctr31));
+}
