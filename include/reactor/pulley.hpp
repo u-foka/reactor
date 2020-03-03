@@ -28,7 +28,7 @@ class pulley
  public:
    pulley();
 
-   T *operator->();
+   T *operator->() const;
 
  private:
    static contract<T> _contract;
@@ -48,7 +48,7 @@ pulley<T>::pulley()
 }
 
 template<typename T>
-T *pulley<T>::operator->()
+T *pulley<T>::operator->() const
 {
    return &_obj;
 }
