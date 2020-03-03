@@ -619,9 +619,11 @@ TEST_F(reactor, pulley)
 
    re::pulley<i_test> p28;
    // re::pulley<i_test, "named"> p29;
+   const re::pulley<i_test> p28c;
 
    EXPECT_EQ(28, p28->get_id());
    // EXPECT_EQ(29, p29->get_id());
+   EXPECT_EQ(28, p28c->get_id());
 }
 
 TEST_F(reactor, instance_exists)
