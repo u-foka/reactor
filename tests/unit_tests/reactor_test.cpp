@@ -13,6 +13,7 @@
 #include <reactor/factory_wrapper_registrator.hpp>
 #include <reactor/make_unique_polyfil.hpp>
 #include <reactor/pulley.hpp>
+#include <reactor/lazy_pulley.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
@@ -623,6 +624,17 @@ TEST_F(reactor, pulley)
 
    EXPECT_EQ(28, p28->get_id());
    // EXPECT_EQ(29, p29->get_id());
+   EXPECT_EQ(28, p28c->get_id());
+}
+
+TEST_F(reactor, lazy_pulley)
+{
+   re::factory_registrator<i_test, test<28>, false, true> reg28(re::prio_normal);
+
+   re::lazy_pulley<i_test> p28;
+   const re::lazy_pulley<i_test> p28c;
+
+   EXPECT_EQ(28, p28->get_id());
    EXPECT_EQ(28, p28c->get_id());
 }
 
