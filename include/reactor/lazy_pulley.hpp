@@ -52,7 +52,7 @@ T *lazy_pulley<T>::operator->() const
 {
    if (nullptr == _obj)
    {
-      _obj = r.get(_contract);
+      _obj = &r.get(_contract);
    }
    
    return _obj;
