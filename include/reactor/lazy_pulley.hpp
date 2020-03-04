@@ -33,7 +33,7 @@ class lazy_pulley
  private:
    static contract<T> _contract;
 
-   T *_obj;
+   mutable T *_obj;
 };
 
 // ----
