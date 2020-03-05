@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __IWS_REACTOR_PULLEY_HPP__
-#define __IWS_REACTOR_PULLEY_HPP__
+#ifndef __IWS_REACTOR_LAZY_PULLEY_HPP__
+#define __IWS_REACTOR_LAZY_PULLEY_HPP__
 
 #include "contract.hpp"
 #include "r.hpp"
@@ -23,37 +23,44 @@ namespace iws {
 namespace reactor {
 
 template<typename T>
-class pulley
+class lazy_pulley
 {
  public:
    static const contract<T> _contract;
 
-   pulley();
+   lazy_pulley();
 
    T *operator->() const;
 
  private:
-   T &_obj;
+   mutable T *_obj;
 };
 
 // ----
 
 template<typename T>
-const contract<T> pulley<T>::_contract;
+const contract<T> lazy_pulley<T>::_contract;
 
 template<typename T>
-pulley<T>::pulley()
-      : _obj(r.get(_contract))
+lazy_pulley<T>::lazy_pulley()
+      : _obj(nullptr)
 {
 }
 
 template<typename T>
-T *pulley<T>::operator->() const
+T *lazy_pulley<T>::operator->() const
 {
-   return &_obj;
+   // No locking or anything here, r.get() is already thread safe, worst case we'll get the same object twice and store it twice.
+   // (storage of the pointer should be atomic as pointer size matches instruction size)
+   if (nullptr == _obj)
+   {
+      _obj = &r.get(_contract);
+   }
+   
+   return _obj;
 }
 
 } // namespace reactor
 } // namespace iws
 
-#endif // __IWS_REACTOR_PULLEY_HPP__
+#endif // __IWS_REACTOR_LAZY_PULLEY_HPP__
