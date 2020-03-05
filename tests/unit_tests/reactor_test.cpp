@@ -11,9 +11,9 @@
 #include <reactor/factory_registrator.hpp>
 #include <reactor/factory_wrapper.hpp>
 #include <reactor/factory_wrapper_registrator.hpp>
+#include <reactor/lazy_pulley.hpp>
 #include <reactor/make_unique_polyfil.hpp>
 #include <reactor/pulley.hpp>
-#include <reactor/lazy_pulley.hpp>
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
@@ -621,7 +621,7 @@ TEST_F(reactor, pulley)
    re::pulley<i_test> p28;
    // re::pulley<i_test, "named"> p29;
    const re::pulley<i_test> p28c;
-   
+
    EXPECT_TRUE(re::r.instance_exists(p28._contract));
 
    EXPECT_EQ(28, p28->get_id());
@@ -635,14 +635,55 @@ TEST_F(reactor, lazy_pulley)
 
    re::lazy_pulley<i_test> p28;
    const re::lazy_pulley<i_test> p28c;
-   
+
    EXPECT_FALSE(re::r.instance_exists(p28._contract));
 
    EXPECT_EQ(28, p28->get_id());
-      
+
    EXPECT_TRUE(re::r.instance_exists(p28._contract));
 
    EXPECT_EQ(28, p28c->get_id());
+}
+
+TEST_F(reactor, lazy_pulley_concurrency)
+{
+   constexpr int rounds = 1000;
+   constexpr int threads = 10;
+
+   re::factory_registrator<i_test, test<28>, false, true> reg28(re::prio_normal);
+
+   std::vector<std::future<void *>> futures;
+   futures.resize(threads);
+
+   std::vector<void *> res;
+
+   for (int i = 0; i < rounds; ++i)
+   {
+      inst->reset_objects();
+      re::lazy_pulley<i_test> p28;
+
+      res.clear();
+      res.reserve(threads);
+
+      for (auto it = futures.begin(); it != futures.end(); ++it)
+      {
+         *it = std::async([&]() {
+            EXPECT_EQ(28, p28->get_id());
+            return (void *)p28.operator->();
+         });
+      }
+
+      for (auto it = futures.begin(); it != futures.end(); ++it)
+      {
+         res.push_back((*it).get());
+      }
+
+      const auto firstval = res.front();
+      for (auto val : res)
+      {
+         EXPECT_EQ(firstval, val);
+      }
+   }
 }
 
 TEST_F(reactor, instance_exists)
@@ -655,7 +696,7 @@ TEST_F(reactor, instance_exists)
 
    EXPECT_FALSE(inst->instance_exists(ctr30));
    EXPECT_FALSE(inst->instance_exists(ctr31));
-   
+
    EXPECT_EQ(30, inst->get(ctr30).get_id());
    EXPECT_TRUE(inst->instance_exists(ctr30));
    EXPECT_FALSE(inst->instance_exists(ctr31));

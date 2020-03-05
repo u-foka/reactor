@@ -50,6 +50,8 @@ lazy_pulley<T>::lazy_pulley()
 template<typename T>
 T *lazy_pulley<T>::operator->() const
 {
+   // No locing or anything here, r.get() is already thread safe, wors case we'll get the same object twice and store it twice.
+   // (storage of the pointer should be atomic as pointer size matches instruction size)
    if (nullptr == _obj)
    {
       _obj = &r.get(_contract);
