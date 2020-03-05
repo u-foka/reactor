@@ -26,20 +26,20 @@ template<typename T>
 class pulley
 {
  public:
+   static const contract<T> _contract;
+
    pulley();
 
    T *operator->() const;
 
  private:
-   static contract<T> _contract;
-
    T &_obj;
 };
 
 // ----
 
 template<typename T>
-contract<T> pulley<T>::_contract;
+const contract<T> pulley<T>::_contract;
 
 template<typename T>
 pulley<T>::pulley()

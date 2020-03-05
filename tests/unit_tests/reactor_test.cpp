@@ -621,6 +621,8 @@ TEST_F(reactor, pulley)
    re::pulley<i_test> p28;
    // re::pulley<i_test, "named"> p29;
    const re::pulley<i_test> p28c;
+   
+   EXPECT_TRUE(re::r.instance_exists(p28._contract));
 
    EXPECT_EQ(28, p28->get_id());
    // EXPECT_EQ(29, p29->get_id());
@@ -633,8 +635,13 @@ TEST_F(reactor, lazy_pulley)
 
    re::lazy_pulley<i_test> p28;
    const re::lazy_pulley<i_test> p28c;
+   
+   EXPECT_FALSE(re::r.instance_exists(p28._contract));
 
    EXPECT_EQ(28, p28->get_id());
+      
+   EXPECT_TRUE(re::r.instance_exists(p28._contract));
+
    EXPECT_EQ(28, p28c->get_id());
 }
 

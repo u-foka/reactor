@@ -26,20 +26,20 @@ template<typename T>
 class lazy_pulley
 {
  public:
+   static const contract<T> _contract;
+
    lazy_pulley();
 
    T *operator->() const;
 
  private:
-   static contract<T> _contract;
-
    mutable T *_obj;
 };
 
 // ----
 
 template<typename T>
-contract<T> lazy_pulley<T>::_contract;
+const contract<T> lazy_pulley<T>::_contract;
 
 template<typename T>
 lazy_pulley<T>::lazy_pulley()
