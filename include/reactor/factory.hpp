@@ -18,6 +18,7 @@
 #include "factory_base.hpp"
 
 #include "integer_sequence_polyfil.hpp"
+#include "utils.hpp"
 
 namespace iws {
 namespace reactor {
@@ -56,13 +57,11 @@ class factory : public factory_base
  private:
    std::tuple<Args...> _args;
 
-   template<bool do_pass_name, size_t... Idx>
-   factory_result produce_impl(
-         typename std::enable_if<!do_pass_name, const std::string &>::type, pf::index_sequence<Idx...>) const;
+   template<bool do_pass_name, size_t... Idx, detail::enable_if_t<!do_pass_name, int> = 0>
+   factory_result produce_impl(const std::string &, pf::index_sequence<Idx...>) const;
 
-   template<bool do_pass_name, size_t... Idx>
-   factory_result produce_impl(
-         typename std::enable_if<do_pass_name, const std::string &>::type instance, pf::index_sequence<Idx...>) const;
+   template<bool do_pass_name, size_t... Idx, detail::enable_if_t<do_pass_name, int> = 0>
+   factory_result produce_impl(const std::string &instance, pf::index_sequence<Idx...>) const;
 };
 
 // ----
@@ -81,17 +80,15 @@ factory_result factory<I, T, pass_name, Args...>::produce(const std::string &ins
 }
 
 template<typename I, typename T, bool pass_name, typename... Args>
-template<bool do_pass_name, size_t... Idx>
-factory_result factory<I, T, pass_name, Args...>::produce_impl(
-      typename std::enable_if<!do_pass_name, const std::string &>::type, pf::index_sequence<Idx...>) const
+template<bool do_pass_name, size_t... Idx, detail::enable_if_t<!do_pass_name, int>>
+factory_result factory<I, T, pass_name, Args...>::produce_impl(const std::string &, pf::index_sequence<Idx...>) const
 {
    return std::shared_ptr<I>(std::make_shared<T>(std::get<Idx>(_args)...));
 }
 
 template<typename I, typename T, bool pass_name, typename... Args>
-template<bool do_pass_name, size_t... Idx>
-factory_result factory<I, T, pass_name, Args...>::produce_impl(
-      typename std::enable_if<do_pass_name, const std::string &>::type instance, pf::index_sequence<Idx...>) const
+template<bool do_pass_name, size_t... Idx, detail::enable_if_t<do_pass_name, int>>
+factory_result factory<I, T, pass_name, Args...>::produce_impl(const std::string &instance, pf::index_sequence<Idx...>) const
 {
    return std::shared_ptr<I>(std::make_shared<T>(instance, std::get<Idx>(_args)...));
 }
