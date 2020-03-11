@@ -18,12 +18,18 @@
 #include <memory>
 
 #include "contract.hpp"
-#include "pulley_type.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
 
 namespace iws {
 namespace reactor {
+
+enum pulley_type
+{
+   reference_pulley = 0,
+   lazy_reference_pulley,
+   shared_ptr_pulley
+};
 
 template<typename T, pulley_type type, typename enable = void>
 class pulley_base;
@@ -33,12 +39,27 @@ class pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>
 {
  protected:
    pulley_base() = delete;
-   explicit pulley_base(T &obj);
+   explicit pulley_base(const typed_contract<T> &contract);
 
    T *get() const;
 
  private:
+   const typed_contract<T> &_contract;
    T &_obj;
+};
+
+template<typename T, pulley_type type>
+class pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>
+{
+ protected:
+   pulley_base() = delete;
+   explicit pulley_base(const typed_contract<T> &contract);
+
+   T *get() const;
+
+ private:
+   const typed_contract<T> &_contract;
+   mutable T *_obj;
 };
 
 template<typename T, pulley_type type>
@@ -46,11 +67,12 @@ class pulley_base<T, type, detail::enable_if_t<shared_ptr_pulley == type>>
 {
  protected:
    pulley_base() = delete;
-   explicit pulley_base(T &obj);
+   explicit pulley_base(const typed_contract<T> &contract);
 
    T *get() const;
 
  private:
+   const typed_contract<T> &_contract;
    std::shared_ptr<T> _obj;
 };
 
@@ -68,8 +90,8 @@ class pulley : public pulley_base<T, type>
 // ----
 
 template<typename T, pulley_type type>
-pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>::pulley_base(T &obj)
-      : _obj(obj)
+pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>::pulley_base(const typed_contract<T> &contract)
+      : _contract(contract), _obj(r.get(_contract))
 {
 }
 
@@ -80,8 +102,27 @@ T *pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>::get() co
 }
 
 template<typename T, pulley_type type>
-pulley_base<T, type, detail::enable_if_t<shared_ptr_pulley == type>>::pulley_base(T &obj)
-      : _obj(r.get_ptr(obj))
+pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>::pulley_base(const typed_contract<T> &contract)
+      : _contract(contract), _obj(nullptr)
+{
+}
+
+template<typename T, pulley_type type>
+T *pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>::get() const
+{
+   // No locking or anything here, r.get() is already thread safe, worst case we'll get the same object twice and store
+   // it twice.
+   // (storage of the pointer should be atomic as pointer size matches instruction size)
+   if (nullptr == _obj)
+   {
+      _obj = &r.get(_contract);
+   }
+   return _obj;
+}
+
+template<typename T, pulley_type type>
+pulley_base<T, type, detail::enable_if_t<shared_ptr_pulley == type>>::pulley_base(const typed_contract<T> &contract)
+      : _contract(contract), _obj(r.get_ptr(r.get(_contract)))
 {
 }
 
@@ -96,7 +137,7 @@ const contract<T> pulley<T, type>::_contract;
 
 template<typename T, pulley_type type>
 pulley<T, type>::pulley()
-      : pulley_base<T, type>(r.get(_contract))
+      : pulley_base<T, type>(_contract)
 {
 }
 

@@ -11,7 +11,6 @@
 #include <reactor/factory_registrator.hpp>
 #include <reactor/factory_wrapper.hpp>
 #include <reactor/factory_wrapper_registrator.hpp>
-#include <reactor/lazy_pulley.hpp>
 #include <reactor/make_unique_polyfil.hpp>
 #include <reactor/pulley.hpp>
 #include <reactor/r.hpp>
@@ -622,6 +621,7 @@ TEST_F(reactor, pulley)
    // re::pulley<i_test, "named"> p29;
    const re::pulley<i_test> p28c;
    re::pulley<i_test, re::shared_ptr_pulley> p28s;
+   const re::pulley<i_test, re::shared_ptr_pulley> p28cs;
 
    EXPECT_TRUE(re::r.instance_exists(p28._contract));
 
@@ -630,16 +630,17 @@ TEST_F(reactor, pulley)
    EXPECT_EQ(28, p28c->get_id());
 
    EXPECT_EQ(28, p28s->get_id());
+   EXPECT_EQ(28, p28cs->get_id());
    re::r.reset_objects();
    EXPECT_EQ(28, p28s->get_id()); // Still holds it :)
 }
 
-TEST_F(reactor, lazy_pulley)
+TEST_F(reactor, lazy_reference_pulley)
 {
    re::factory_registrator<i_test, test<28>, false, true> reg28(re::prio_normal);
 
-   re::lazy_pulley<i_test> p28;
-   const re::lazy_pulley<i_test> p28c;
+   re::pulley<i_test, re::lazy_reference_pulley> p28;
+   const re::pulley<i_test, re::lazy_reference_pulley> p28c;
 
    EXPECT_FALSE(re::r.instance_exists(p28._contract));
 
@@ -650,7 +651,7 @@ TEST_F(reactor, lazy_pulley)
    EXPECT_EQ(28, p28c->get_id());
 }
 
-TEST_F(reactor, lazy_pulley_concurrency)
+TEST_F(reactor, lazy_reference_pulley_concurrency)
 {
    constexpr int rounds = 1000;
    constexpr int threads = 10;
@@ -665,7 +666,7 @@ TEST_F(reactor, lazy_pulley_concurrency)
    for (int i = 0; i < rounds; ++i)
    {
       inst->reset_objects();
-      re::lazy_pulley<i_test> p28;
+      re::pulley<i_test, re::lazy_reference_pulley> p28;
 
       res.clear();
       res.reserve(threads);
