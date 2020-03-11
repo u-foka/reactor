@@ -621,12 +621,17 @@ TEST_F(reactor, pulley)
    re::pulley<i_test> p28;
    // re::pulley<i_test, "named"> p29;
    const re::pulley<i_test> p28c;
+   re::pulley<i_test, re::shared_ptr_pulley> p28s;
 
    EXPECT_TRUE(re::r.instance_exists(p28._contract));
 
    EXPECT_EQ(28, p28->get_id());
    // EXPECT_EQ(29, p29->get_id());
    EXPECT_EQ(28, p28c->get_id());
+
+   EXPECT_EQ(28, p28s->get_id());
+   re::r.reset_objects();
+   EXPECT_EQ(28, p28s->get_id()); // Still holds it :)
 }
 
 TEST_F(reactor, lazy_pulley)

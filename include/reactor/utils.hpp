@@ -16,6 +16,7 @@
 #define REACTOR_UTILS_HPP
 
 #include <algorithm>
+#include <type_traits>
 
 /* Unused variable helper */
 #define UNUSED(X) (void)(X)
