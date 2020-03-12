@@ -123,8 +123,27 @@ endif(REACTOR_STATIC)
 target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
 
 if(NOT HAS_PARENT)
-  # In standalone mode setup the testing and maintenance targets
+  # Version file generation for packaging
+  option(GENERATE_VERSION "generate VERSION file in the source root directory for packaging" false)
+  if(GENERATE_VERSION)
+    configure_file(src/VERSION.in ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
+  endif(GENERATE_VERSION)
 
+  # Packaging support for standalone mode
+  set(CPACK_SOURCE_GENERATOR "ZIP")
+  set(CPACK_SOURCE_IGNORE_FILES
+    /.git
+    /.vs
+    /.vscode
+    /CMakeSettings.json
+    /out
+    /thirdparty
+    /.*build.*
+    /\\\\.DS_Store
+  )
+  include(CPack)
+
+  # In standalone mode setup the testing and maintenance targets
   enable_testing()
 
   add_subdirectory(tests)
