@@ -23,7 +23,8 @@ include_directories(include_directories(${PROJECT_SOURCE_ROOT_DIR}))
 set(TEST_NAME ${PROJECT_NAME}_test)
 
 add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS})
-target_link_libraries(${TEST_NAME} PRIVATE ${REACTOR_LIBRARY} $<TARGET_OBJECTS:test_lib> gmock gtest Threads::Threads)
+target_sources(${TEST_NAME} PRIVATE $<TARGET_OBJECTS:test_lib>)
+target_link_libraries(${TEST_NAME} PRIVATE ${REACTOR_LIBRARY} gmock gtest Threads::Threads)
 target_code_coverage(${TEST_NAME} AUTO ALL EXCLUDE tests/* thirdparty/*)
 
 add_test(${TEST_NAME} ${COMMON_BUILD_BINARY_DIR}/${TEST_NAME})
