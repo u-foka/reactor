@@ -7,6 +7,8 @@ namespace reactor_test {
 
 class ext_test_impl : public i_ext_test
 {
+ public:
+   ext_test_impl() {}
    virtual bool are_you_ext() { return true; }
 };
 

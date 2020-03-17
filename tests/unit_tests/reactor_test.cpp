@@ -17,7 +17,7 @@
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
-#include "i_ext_test.hpp"
+#include "test_lib/i_ext_test.hpp"
 
 namespace sph = std::placeholders;
 
