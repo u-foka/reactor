@@ -16,6 +16,7 @@
 #define REACTOR_UTILS_HPP
 
 #include <algorithm>
+#include <type_traits>
 
 /* Unused variable helper */
 #define UNUSED(X) (void)(X)
@@ -70,6 +71,10 @@ void erase_if(ContainerT &items, const PredicateT &predicate)
          ++it;
    }
 }
+
+// C++11 lacks this and it's easier to use the replacement everywhere than switching between library implementation and polyfil..
+template<bool _Test, class _Ty = void>
+using enable_if_t = typename std::enable_if<_Test, _Ty>::type;
 
 } // namespace detail
 } // namespace reactor
