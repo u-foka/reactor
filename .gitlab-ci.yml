@@ -601,6 +601,7 @@ pack:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
+  dependencies: [] # Disable artifact restoration
   artifacts:
     paths:
       - build-pack/*.zip
