@@ -55,10 +55,6 @@ else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${COMMON_BUILD_BINARY_DIR} CACHE PATH "Single Directory for all Executables.")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${COMMON_BUILD_BINARY_DIR} CACHE PATH "Single Directory for all Libraries")
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${COMMON_BUILD_ARCHIVE_DIR} CACHE PATH "Single Directory for all static libraries.")
-
-  # Setup googletest up here so it wont get our warning flags
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
-  add_subdirectory(thirdparty/googletest)
 endif()
 
 option(REACTOR_CXX11_ENABLED "restrict c++ standard to c++11 (instead of the default c++14)" false)
@@ -80,6 +76,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(MSVC)
     add_compile_options("/Zc:__cplusplus")
 endif(MSVC)
+
+if(NOT HAS_PARENT)
+  # Setup googletest up here so it wont get our warning flags
+  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE) # Do not create install rules for gtest
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
+  add_subdirectory(thirdparty/googletest)
+endif(NOT HAS_PARENT)
 
 include(enable_flag_if_supported)
 
