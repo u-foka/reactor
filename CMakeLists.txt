@@ -140,6 +140,7 @@ if(NOT HAS_PARENT)
 
   # Packaging support for standalone mode
   set(CPACK_SOURCE_GENERATOR "ZIP")
+  set(CPACK_SOURCE_PACKAGE_FILE_NAME "reactor-${PROJECT_VERSION}")
   set(CPACK_SOURCE_IGNORE_FILES
     /.git
     /.vs
