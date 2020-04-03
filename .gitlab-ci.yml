@@ -604,9 +604,11 @@ pack:
   artifacts:
     paths:
       - build-pack/*.zip
+      - build-pack/_CPack_Packages
   script:
     - mkdir build-pack
     - cd build-pack
     - cmake ../ -DGENERATE_VERSION=ON
     - cpack --config CPackSourceConfig.cmake
     - ls -la *.zip
+
