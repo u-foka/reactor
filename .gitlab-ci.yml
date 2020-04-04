@@ -601,6 +601,10 @@ pack:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
+  only:
+    - /^v\d/
+  except:
+    - branches
   dependencies: [] # Disable artifact restoration
   artifacts:
     paths:
