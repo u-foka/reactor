@@ -16,6 +16,8 @@
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
+#include "test_lib/i_ext_test.hpp"
+
 namespace sph = std::placeholders;
 
 using testing::_;
@@ -710,4 +712,11 @@ TEST_F(reactor, instance_exists)
    EXPECT_EQ(31, inst->get(ctr31).get_id());
    EXPECT_TRUE(inst->instance_exists(ctr30));
    EXPECT_TRUE(inst->instance_exists(ctr31));
+}
+
+TEST_F(reactor, ext_impl)
+{
+   re::contract<iws::reactor_test::i_ext_test> ct;
+
+   EXPECT_TRUE(re::r.get(ct).are_you_ext());
 }

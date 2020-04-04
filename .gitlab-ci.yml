@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - pack
 
 variables:
     DOCKER_DRIVER: overlay2
@@ -594,3 +595,23 @@ release-test-msvc-cpp11:
     - cd build
     - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check
+
+pack:
+  stage: pack
+  tags:
+    - docker
+  image: registry.iwstudio.hu/iws/ubuild:latest
+  only:
+    - /^v\d/
+  except:
+    - branches
+  dependencies: [] # Disable artifact restoration
+  artifacts:
+    paths:
+      - build-pack/*.zip
+  script:
+    - mkdir build-pack
+    - cd build-pack
+    - cmake ../ -DGENERATE_VERSION=ON
+    - cpack --config CPackSourceConfig.cmake
+

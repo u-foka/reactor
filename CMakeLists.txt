@@ -2,21 +2,28 @@ cmake_minimum_required(VERSION 3.1)
 
 project(reactor)
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" AND NOT GENERATE_VERSION)
   # Parse version information delivered with the package
   file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PACKAGED_PRODUCT_VERSION)
-  set(PRODUCT_VERSION PACKAGED_PRODUCT_VERSION)
+  set(PRODUCT_VERSION ${PACKAGED_PRODUCT_VERSION})
   list(GET PACKAGED_PRODUCT_VERSION 0 PROJECT_VERSION)
   list(GET PACKAGED_PRODUCT_VERSION 1 PROJECT_SOVERSION)
 else()
   # Detect version from git tag
   execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                  COMMAND git describe --all --match "v*"
+                  COMMAND git describe --all --match "v[0-9]*"
+                  RESULT_VARIABLE GIT_DESCRIBE_RESULT
                   OUTPUT_VARIABLE PROJECT_VERSION)
   string(REGEX REPLACE "^tags/v(.+)\n$" "\\1" PROJECT_VERSION "${PROJECT_VERSION}")
   string(REGEX REPLACE "^([(0-9)]+\\.[(0-9)]+).*$" "\\1" PROJECT_SOVERSION "${PROJECT_VERSION}")
-  set(DETECTED_PRODUCT_VERSION ${PROJECT_VERSION} ${PROJECT_SOVERSION})
-  set(PRODUCT_VERSION ${DETECTED_PRODUCT_VERSION})
+  if (GIT_DESCRIBE_RESULT EQUAL "0" AND PROJECT_SOVERSION MATCHES "^[(0-9)]+\\.[(0-9)]+$")
+    set(DETECTED_PRODUCT_VERSION ${PROJECT_VERSION} ${PROJECT_SOVERSION})
+    set(PRODUCT_VERSION ${DETECTED_PRODUCT_VERSION})
+  else()
+    set(PROJECT_VERSION "x.y-unknown")
+    set(PROJECT_SOVERSION "x.y")
+    set(PRODUCT_VERSION ${PROJECT_VERSION} ${PROJECT_SOVERSION})
+  endif()
 endif()
 
 get_directory_property(HAS_PARENT PARENT_DIRECTORY)
@@ -55,10 +62,6 @@ else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${COMMON_BUILD_BINARY_DIR} CACHE PATH "Single Directory for all Executables.")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${COMMON_BUILD_BINARY_DIR} CACHE PATH "Single Directory for all Libraries")
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${COMMON_BUILD_ARCHIVE_DIR} CACHE PATH "Single Directory for all static libraries.")
-
-  # Setup googletest up here so it wont get our warning flags
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
-  add_subdirectory(thirdparty/googletest)
 endif()
 
 option(REACTOR_CXX11_ENABLED "restrict c++ standard to c++11 (instead of the default c++14)" false)
@@ -80,6 +83,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(MSVC)
     add_compile_options("/Zc:__cplusplus")
 endif(MSVC)
+
+if(NOT HAS_PARENT)
+  # Setup googletest up here so it wont get our warning flags
+  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE) # Do not create install rules for gtest
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
+  add_subdirectory(thirdparty/googletest)
+endif(NOT HAS_PARENT)
 
 include(enable_flag_if_supported)
 
@@ -129,8 +139,28 @@ endif(REACTOR_STATIC)
 target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
 
 if(NOT HAS_PARENT)
-  # In standalone mode setup the testing and maintenance targets
+  # Version file generation for packaging
+  option(GENERATE_VERSION "generate VERSION file in the source root directory for packaging" false)
+  if(GENERATE_VERSION)
+    configure_file(src/VERSION.in ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
+  endif(GENERATE_VERSION)
 
+  # Packaging support for standalone mode
+  set(CPACK_SOURCE_GENERATOR "ZIP")
+  set(CPACK_SOURCE_PACKAGE_FILE_NAME "reactor-${PROJECT_VERSION}")
+  set(CPACK_SOURCE_IGNORE_FILES
+    "/\.git"
+    "/\.vs"
+    "/\.vscode"
+    "/CMakeSettings.json"
+    "/out/"
+    "/build/"
+    "/build-pack"
+    "/\.DS_Store"
+  )
+  include(CPack)
+
+  # In standalone mode setup the testing and maintenance targets
   enable_testing()
 
   add_subdirectory(tests)
