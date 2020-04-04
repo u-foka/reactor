@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 project(reactor)
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" AND NOT GENERATE_VERSION)
   # Parse version information delivered with the package
   file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PACKAGED_PRODUCT_VERSION)
   set(PRODUCT_VERSION ${PACKAGED_PRODUCT_VERSION})
