@@ -11,12 +11,12 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
 else()
   # Detect version from git tag
   execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                  COMMAND git describe --all --match "v*"
+                  COMMAND git describe --all --match "v[0-9]*"
                   RESULT_VARIABLE GIT_DESCRIBE_RESULT
                   OUTPUT_VARIABLE PROJECT_VERSION)
-  if (GIT_DESCRIBE_RESULT EQUAL "0")
-    string(REGEX REPLACE "^tags/v(.+)\n$" "\\1" PROJECT_VERSION "${PROJECT_VERSION}")
-    string(REGEX REPLACE "^([(0-9)]+\\.[(0-9)]+).*$" "\\1" PROJECT_SOVERSION "${PROJECT_VERSION}")
+  string(REGEX REPLACE "^tags/v(.+)\n$" "\\1" PROJECT_VERSION "${PROJECT_VERSION}")
+  string(REGEX REPLACE "^([(0-9)]+\\.[(0-9)]+).*$" "\\1" PROJECT_SOVERSION "${PROJECT_VERSION}")
+  if (GIT_DESCRIBE_RESULT EQUAL "0" AND PROJECT_SOVERSION MATCHES "^[(0-9)]+\\.[(0-9)]+$")
     set(DETECTED_PRODUCT_VERSION ${PROJECT_VERSION} ${PROJECT_SOVERSION})
     set(PRODUCT_VERSION ${DETECTED_PRODUCT_VERSION})
   else()
