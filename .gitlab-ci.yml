@@ -604,12 +604,10 @@ pack:
   dependencies: [] # Disable artifact restoration
   artifacts:
     paths:
-#      - build-pack/*.zip
-      - build-pack
+      - build-pack/*.zip
   script:
     - mkdir build-pack
     - cd build-pack
     - cmake ../ -DGENERATE_VERSION=ON
     - cpack --config CPackSourceConfig.cmake
-    - ls -la *.zip
 
