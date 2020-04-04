@@ -604,8 +604,8 @@ pack:
   dependencies: [] # Disable artifact restoration
   artifacts:
     paths:
-      - build-pack/*.zip
-      - build-pack/_CPack_Packages
+#      - build-pack/*.zip
+      - build-pack
   script:
     - mkdir build-pack
     - cd build-pack
