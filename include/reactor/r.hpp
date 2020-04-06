@@ -17,7 +17,7 @@
 
 #include <atomic>
 
-#include <reactor/utils.hpp>
+#include <reactor/reactor_dll.hpp>
 
 namespace iws {
 namespace reactor {
