@@ -12,22 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef __IWS_REACTOR_REACTOR_DLL_HPP__
+#define __IWS_REACTOR_REACTOR_DLL_HPP__
 
-#include <reactor/utils.hpp>
+/* Windows dllimport (exports are handled by cmake) */
+#if !defined(REACTOR_LIBRARY) && !defined(REACTOR_STATIC) && defined(_WIN32)
+#define REACTOR_IMPORT __declspec(dllimport)
+#else
+#define REACTOR_IMPORT
+#endif
 
-/* Project version */
-#define PROJECT_VERSION @PROJECT_VERSION@
-
-/* Static build */
-#cmakedefine REACTOR_STATIC
-
-/* Build date */
-#define BUILD_DATE @CURR_DATE@
-#define BUILD_YEAR @CURR_YEAR@
-
-/* Source Root */
-#define PROJECT_SOURCE_ROOT_DIR "@PROJECT_SOURCE_ROOT_DIR@"
-
-#endif // CONFIG_HPP
+#endif //__IWS_REACTOR_REACTOR_DLL_HPP__
