@@ -74,7 +74,7 @@ class callback_holder_impl
    template<bool ENABLE = ArgForwardMode == CB_COPY_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    size_t connect(value_type cb)
    {
-      Locks::lock_unique lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       _list[_next_id] = cb;
       return _next_id++;
@@ -83,7 +83,7 @@ class callback_holder_impl
    template<bool ENABLE = ArgForwardMode == CB_COPY_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    bool disconnect(size_t id)
    {
-      Locks::lock_unique lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       auto it = _list.find(id);
       if (it != _list.end())
@@ -98,7 +98,7 @@ class callback_holder_impl
    template<bool ENABLE = ArgForwardMode == CB_FORWARD_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    void set(value_type cb)
    {
-      Locks::lock_unique lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       _list[_next_id] = cb;
       // No stepping of _next_id here so we'll always override the existing callback in forwarding mode...
@@ -106,28 +106,28 @@ class callback_holder_impl
 
    void clear()
    {
-      Locks::lock_unique lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       _list.clear();
    }
 
    void operator()(Args &&... args)
    {
-      Locks::lock_shared lock(_mutex);
+      typename Locks::lock_shared lock(_mutex);
 
       call(call_trait_t<ArgForwardMode>(), std::forward<Args>(args)...);
    }
 
    size_t callback_count()
    {
-      Locks::lock_shared lock(_mutex);
+      typename Locks::lock_shared lock(_mutex);
 
       return _list.size();
    }
 
    operator bool()
    {
-      Locks::lock_shared lock(_mutex);
+      typename Locks::lock_shared lock(_mutex);
 
       return 0 != _list.size();
    }
