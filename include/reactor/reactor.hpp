@@ -90,8 +90,8 @@ class reactor
    template<typename T>
    typename addon_func_map<T>::type get_addons(const std::string &instance = std::string());
 
-   callback_holder<> sig_before_reset_objects;
-   callback_holder<> sig_after_reset_objects;
+   threadsafe_callback_holder<> sig_before_reset_objects;
+   threadsafe_callback_holder<> sig_after_reset_objects;
 
    bool validate_contracts();
    contract_list unsatisfied_contracts();
