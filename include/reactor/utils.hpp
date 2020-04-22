@@ -65,7 +65,8 @@ void erase_if(ContainerT &items, const PredicateT &predicate)
    }
 }
 
-// C++11 lacks this and it's easier to use the replacement everywhere than switching between library implementation and polyfil..
+// C++11 lacks this and it's easier to use the replacement everywhere than switching between library implementation and
+// polyfil..
 template<bool _Test, class _Ty = void>
 using enable_if_t = typename std::enable_if<_Test, _Ty>::type;
 
