@@ -91,7 +91,8 @@ class pulley : public pulley_base<T, type>
 
 template<typename T, pulley_type type>
 pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>::pulley_base(const typed_contract<T> &contract)
-      : _contract(contract), _obj(r.get(_contract))
+      : _contract(contract)
+      , _obj(r.get(_contract))
 {
 }
 
@@ -103,7 +104,8 @@ T *pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>::get() co
 
 template<typename T, pulley_type type>
 pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>::pulley_base(const typed_contract<T> &contract)
-      : _contract(contract), _obj(nullptr)
+      : _contract(contract)
+      , _obj(nullptr)
 {
 }
 
@@ -122,7 +124,8 @@ T *pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>::get
 
 template<typename T, pulley_type type>
 pulley_base<T, type, detail::enable_if_t<shared_ptr_pulley == type>>::pulley_base(const typed_contract<T> &contract)
-      : _contract(contract), _obj(r.get_ptr(r.get(_contract)))
+      : _contract(contract)
+      , _obj(r.get_ptr(r.get(_contract)))
 {
 }
 

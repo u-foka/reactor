@@ -10,6 +10,7 @@
 namespace ph = std::placeholders;
 using ::testing::_;
 using ::testing::Invoke;
+using ::testing::SetArgReferee;
 
 namespace pf = iws::polyfil;
 
@@ -22,6 +23,7 @@ struct callback_holder : public ::testing::Test
       MOCK_METHOD0(simple3, void());
       MOCK_METHOD1(simple_arg, void(int));
       MOCK_METHOD1(complex_arg, void(const std::string &));
+      MOCK_METHOD1(ref_arg, void(std::string &));
       MOCK_METHOD1(moved_arg, void(std::unique_ptr<std::string> &&));
       MOCK_METHOD3(multiple_args, void(int, double, std::string));
    };
@@ -33,6 +35,7 @@ struct callback_holder : public ::testing::Test
    std::function<void()> simple3_cb;
    std::function<void(int)> simple_arg_cb;
    std::function<void(const std::string &arg)> complex_arg_cb;
+   std::function<void(std::string &arg)> ref_arg_cb;
    std::function<void(std::unique_ptr<std::string> &&)> moved_arg_cb;
    std::function<void(int, double, std::string)> multiple_args_cb;
 
@@ -42,6 +45,7 @@ struct callback_holder : public ::testing::Test
          , simple3_cb(std::bind(&mock_callback_test::simple3, &mock))
          , simple_arg_cb(std::bind(&mock_callback_test::simple_arg, &mock, ph::_1))
          , complex_arg_cb(std::bind(&mock_callback_test::complex_arg, &mock, ph::_1))
+         , ref_arg_cb(std::bind(&mock_callback_test::ref_arg, &mock, ph::_1))
          , moved_arg_cb(std::bind(&mock_callback_test::moved_arg, &mock, ph::_1))
          , multiple_args_cb(std::bind(&mock_callback_test::multiple_args, &mock, ph::_1, ph::_2, ph::_3))
    {
@@ -150,9 +154,23 @@ TEST_F(callback_holder, disconnect)
    cb();
 }
 
-TEST_F(callback_holder, forward_correct)
+TEST_F(callback_holder, forward_ref_correct)
+{
+   const std::string new_value("changed!");
+   std::string txt("original");
+   EXPECT_CALL(mock, ref_arg(_)).WillRepeatedly(SetArgReferee<0>(new_value));
+
+   iws::callback_holder<std::string &> cb;
+   cb.connect(ref_arg_cb);
+
+   cb(txt);
+   EXPECT_EQ(txt, new_value);
+}
+
+TEST_F(callback_holder, forward_move_correct)
 {
    const std::string txt("here I am");
+   const std::string txt2("42");
    auto to_be_moved = pf::make_unique<std::string>(txt);
    std::string callback_arg;
    EXPECT_CALL(mock, moved_arg(_)).WillRepeatedly(Invoke([&](std::unique_ptr<std::string> &&arg) {
@@ -160,21 +178,19 @@ TEST_F(callback_holder, forward_correct)
       callback_arg = *moved;
    }));
 
-   iws::callback_holder<std::unique_ptr<std::string> &&> cb;
-   cb.connect(moved_arg_cb);
+   iws::forwarding_callback_holder<std::unique_ptr<std::string> &&> cb;
+   cb.set(moved_arg_cb);
 
    cb(std::move(to_be_moved));
    EXPECT_EQ(to_be_moved.get(), nullptr); // Should be empty as it was moved into the callback
    EXPECT_EQ(callback_arg, txt);
 
-   to_be_moved = pf::make_unique<std::string>(txt); // Re-initialize the pointer
-   cb.connect(moved_arg_cb);                        // Connect the callback second time
+   to_be_moved = pf::make_unique<std::string>(txt2); // Re-initialize the pointer
+   cb.set(moved_arg_cb);                             // Connect the callback second time
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-   EXPECT_EXIT((cb(std::move(to_be_moved)), exit(0)), ::testing::KilledBySignal(SIGSEGV), ".*");
-#else
-   EXPECT_DEATH_IF_SUPPORTED((cb(std::move(to_be_moved)), exit(0)), ".*");
-#endif
+   cb(std::move(to_be_moved));
+   EXPECT_EQ(to_be_moved.get(), nullptr); // Should be empty as it was moved into the callback
+   EXPECT_EQ(callback_arg, txt2);
 }
 
 TEST_F(callback_holder, multiple_args)

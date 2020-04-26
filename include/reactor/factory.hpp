@@ -88,7 +88,8 @@ factory_result factory<I, T, pass_name, Args...>::produce_impl(const std::string
 
 template<typename I, typename T, bool pass_name, typename... Args>
 template<bool do_pass_name, size_t... Idx, detail::enable_if_t<do_pass_name, int>>
-factory_result factory<I, T, pass_name, Args...>::produce_impl(const std::string &instance, pf::index_sequence<Idx...>) const
+factory_result factory<I, T, pass_name, Args...>::produce_impl(
+      const std::string &instance, pf::index_sequence<Idx...>) const
 {
    return std::shared_ptr<I>(std::make_shared<T>(instance, std::get<Idx>(_args)...));
 }

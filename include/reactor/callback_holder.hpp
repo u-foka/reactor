@@ -19,24 +19,59 @@
 #include <map>
 
 #include "might_shared_mutex.hpp"
+#include "utils.hpp"
 
 namespace iws {
 
 namespace pf = polyfil;
 
-template<typename... Args>
-class callback_holder
+namespace detail {
+namespace callback_holder {
+
+enum callback_holder_arg_forward_mode
+{
+   CB_COPY_ARGS = 0,
+   CB_FORWARD_ARGS
+};
+
+template<callback_holder_arg_forward_mode Mode>
+struct call_trait
+{
+};
+
+template<>
+struct call_trait<CB_COPY_ARGS>
+{
+   struct type
+   {
+   };
+};
+
+template<>
+struct call_trait<CB_FORWARD_ARGS>
+{
+   struct type
+   {
+   };
+};
+
+template<callback_holder_arg_forward_mode Mode>
+using call_trait_t = typename call_trait<Mode>::type;
+
+template<callback_holder_arg_forward_mode ArgForwardMode = CB_COPY_ARGS, typename... Args>
+class callback_holder_impl
 {
  public:
    typedef std::function<void(Args...)> value_type;
 
-   callback_holder()
+   callback_holder_impl()
          : _next_id(0)
          , _list()
          , _mutex()
    {
    }
 
+   template<bool ENABLE = ArgForwardMode == CB_COPY_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    size_t connect(value_type cb)
    {
       std::unique_lock<pf::might_shared_mutex> lock(_mutex);
@@ -45,6 +80,7 @@ class callback_holder
       return _next_id++;
    }
 
+   template<bool ENABLE = ArgForwardMode == CB_COPY_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    bool disconnect(size_t id)
    {
       std::unique_lock<pf::might_shared_mutex> lock(_mutex);
@@ -59,6 +95,15 @@ class callback_holder
       return false;
    }
 
+   template<bool ENABLE = ArgForwardMode == CB_FORWARD_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
+   void set(value_type cb)
+   {
+      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
+
+      _list[_next_id] = cb;
+      // No stepping of _next_id here so we'll always override the existing callback in forwarding mode...
+   }
+
    void clear()
    {
       std::unique_lock<pf::might_shared_mutex> lock(_mutex);
@@ -69,10 +114,7 @@ class callback_holder
    {
       pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
 
-      for (auto it : _list)
-      {
-         (it.second)(std::forward<Args>(args)...);
-      }
+      call(call_trait_t<ArgForwardMode>(), std::forward<Args>(args)...);
    }
 
    size_t callback_count()
@@ -91,7 +133,33 @@ class callback_holder
    size_t _next_id;
    std::map<size_t, value_type> _list;
    pf::might_shared_mutex _mutex;
+
+   void call(call_trait_t<CB_COPY_ARGS> /* dummy */, const Args &... args)
+   {
+      for (auto it : _list)
+      {
+         (it.second)(args...);
+      }
+   }
+
+   void call(call_trait_t<CB_FORWARD_ARGS> /* dummy */, Args &&... args)
+   {
+      if (0 < _list.size())
+      {
+         _list.begin()->second(std::forward<Args>(args)...);
+      }
+   }
 };
+
+} // namespace callback_holder
+} // namespace detail
+
+template<typename... Args>
+using callback_holder = detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_COPY_ARGS, Args...>;
+
+template<typename... Args>
+using forwarding_callback_holder =
+      detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_FORWARD_ARGS, Args...>;
 
 } // namespace iws
 
