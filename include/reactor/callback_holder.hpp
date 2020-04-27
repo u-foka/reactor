@@ -58,7 +58,7 @@ struct call_trait<CB_FORWARD_ARGS>
 template<callback_holder_arg_forward_mode Mode>
 using call_trait_t = typename call_trait<Mode>::type;
 
-template<callback_holder_arg_forward_mode ArgForwardMode = CB_COPY_ARGS, typename... Args>
+template<callback_holder_arg_forward_mode ArgForwardMode, typename Locks, typename... Args>
 class callback_holder_impl
 {
  public:
@@ -74,7 +74,7 @@ class callback_holder_impl
    template<bool ENABLE = ArgForwardMode == CB_COPY_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    size_t connect(value_type cb)
    {
-      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       _list[_next_id] = cb;
       return _next_id++;
@@ -83,7 +83,7 @@ class callback_holder_impl
    template<bool ENABLE = ArgForwardMode == CB_COPY_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    bool disconnect(size_t id)
    {
-      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       auto it = _list.find(id);
       if (it != _list.end())
@@ -98,7 +98,7 @@ class callback_holder_impl
    template<bool ENABLE = ArgForwardMode == CB_FORWARD_ARGS, reactor::detail::enable_if_t<ENABLE, int> = 0>
    void set(value_type cb)
    {
-      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
 
       _list[_next_id] = cb;
       // No stepping of _next_id here so we'll always override the existing callback in forwarding mode...
@@ -106,33 +106,36 @@ class callback_holder_impl
 
    void clear()
    {
-      std::unique_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_unique lock(_mutex);
+
       _list.clear();
    }
 
    void operator()(Args &&... args)
    {
-      pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_shared lock(_mutex);
 
       call(call_trait_t<ArgForwardMode>(), std::forward<Args>(args)...);
    }
 
    size_t callback_count()
    {
-      pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_shared lock(_mutex);
+
       return _list.size();
    }
 
    operator bool()
    {
-      pf::might_shared_lock<pf::might_shared_mutex> lock(_mutex);
+      typename Locks::lock_shared lock(_mutex);
+
       return 0 != _list.size();
    }
 
  private:
    size_t _next_id;
    std::map<size_t, value_type> _list;
-   pf::might_shared_mutex _mutex;
+   typename Locks::mutex _mutex;
 
    void call(call_trait_t<CB_COPY_ARGS> /* dummy */, const Args &... args)
    {
@@ -151,15 +154,49 @@ class callback_holder_impl
    }
 };
 
+struct dummy_locks
+{
+   struct mutex
+   {
+   };
+
+   struct lock_shared
+   {
+      lock_shared(mutex &) {}
+   };
+
+   struct lock_unique
+   {
+      lock_unique(mutex &) {}
+   };
+};
+
+struct default_locks
+{
+    using mutex = pf::might_shared_mutex;
+    using lock_shared = pf::might_shared_lock<mutex>;
+    using lock_unique = std::unique_lock<mutex>;
+};
+
 } // namespace callback_holder
 } // namespace detail
 
 template<typename... Args>
-using callback_holder = detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_COPY_ARGS, Args...>;
+using callback_holder = detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_COPY_ARGS, detail::callback_holder::dummy_locks, Args...>;
 
 template<typename... Args>
 using forwarding_callback_holder =
-      detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_FORWARD_ARGS, Args...>;
+      detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_FORWARD_ARGS,
+            detail::callback_holder::dummy_locks, Args...>;
+
+template<typename... Args>
+using threadsafe_callback_holder = detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_COPY_ARGS,
+      detail::callback_holder::default_locks, Args...>;
+
+template<typename... Args>
+using threadsafe_forwarding_callback_holder =
+      detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_FORWARD_ARGS,
+            detail::callback_holder::default_locks, Args...>;
 
 } // namespace iws
 
