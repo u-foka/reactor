@@ -18,14 +18,14 @@ struct callback_holder : public ::testing::Test
 {
    struct mock_callback_test
    {
-      MOCK_METHOD0(simple, void());
-      MOCK_METHOD0(simple2, void());
-      MOCK_METHOD0(simple3, void());
-      MOCK_METHOD1(simple_arg, void(int));
-      MOCK_METHOD1(complex_arg, void(const std::string &));
-      MOCK_METHOD1(ref_arg, void(std::string &));
-      MOCK_METHOD1(moved_arg, void(std::unique_ptr<std::string> &&));
-      MOCK_METHOD3(multiple_args, void(int, double, std::string));
+      MOCK_METHOD(void, simple, ());
+      MOCK_METHOD(void, simple2, ());
+      MOCK_METHOD(void, simple3, ());
+      MOCK_METHOD(void, simple_arg, (int));
+      MOCK_METHOD(void, complex_arg, (const std::string &));
+      MOCK_METHOD(void, ref_arg, (std::string &));
+      MOCK_METHOD(void, moved_arg, (std::unique_ptr<std::string> &&));
+      MOCK_METHOD(void, multiple_args, (int, double, std::string));
    };
 
    mock_callback_test mock;
