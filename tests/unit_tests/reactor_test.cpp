@@ -46,7 +46,7 @@ struct reactor : public ::testing::Test
    class mock_test_addon
    {
     public:
-      MOCK_METHOD1(doit, void(std::string));
+      MOCK_METHOD(void, doit, (std::string));
       std::function<void(std::string)> doit_fun() { return std::bind(&mock_test_addon::doit, this, sph::_1); }
    };
 
@@ -117,7 +117,7 @@ struct reactor : public ::testing::Test
 
       virtual const re::index &get_index() const override { return _index; }
 
-      MOCK_METHOD0(try_get, void());
+      MOCK_METHOD(void, try_get, ());
    };
 
    class shutdown_checker
