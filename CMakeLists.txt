@@ -129,9 +129,9 @@ add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 configure_file(src/config.h.in config.h)
 if(MSVC)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE /FI "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+  target_compile_options(${PROJECT_NAME} PRIVATE /FI "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 else(MSVC)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE -include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+  target_compile_options(${PROJECT_NAME} PRIVATE -include "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 endif(MSVC)
 
 if(REACTOR_SHARED)
