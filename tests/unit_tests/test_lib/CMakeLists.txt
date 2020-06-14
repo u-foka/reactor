@@ -12,3 +12,6 @@ include_directories(${PROJECT_SOURCE_ROOT_DIR})
 # so our factories wouldn't register.. there are different whole-link switches for 
 # different toolchains but there is no simple way to do that :(
 add_library(test_lib OBJECT ${TEST_SOURCES})
+if(REACTOR_SHARED)
+	target_compile_definitions(test_lib PRIVATE REACTOR_SHARED)
+endif(REACTOR_SHARED)

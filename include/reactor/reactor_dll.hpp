@@ -16,7 +16,7 @@
 #define __IWS_REACTOR_REACTOR_DLL_HPP__
 
 /* Windows dllimport (exports are handled by cmake) */
-#if !defined(REACTOR_LIBRARY) && !defined(REACTOR_STATIC) && defined(_WIN32)
+#if !defined(REACTOR_LIBRARY) && defined(REACTOR_SHARED) && defined(_WIN32)
 #define REACTOR_IMPORT __declspec(dllimport)
 #else
 #define REACTOR_IMPORT

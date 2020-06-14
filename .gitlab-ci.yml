@@ -425,6 +425,51 @@ release-test-msvc:
     - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check
 
+build-msvc-shared:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - call "%VCVARSALL%" x64
+    - mkdir build
+    - cd build
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=On ..\
+    - cmake --build . --target %CI_PROJECT_NAME%
+    
+debug-build-msvc-shared:
+  stage: build
+  tags:
+    - msvc
+  script:
+    - call "%VCVARSALL%" x64
+    - mkdir build
+    - cd build
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=On ..\
+    - cmake --build . --target %CI_PROJECT_NAME%
+    
+test-msvc-shared:
+  stage: test
+  tags:
+    - msvc
+  dependencies: [] # Disable artifact restoration
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=On ../ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake --build . --target check
+
+release-test-msvc-shared:
+  stage: test
+  tags:
+    - msvc
+  dependencies: [] # Disable artifact restoration
+  script:
+    - call "%VCVARSALL%" x64
+    - mkdir build
+    - cd build
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=On ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake --build . --target check
+
 build-ubuntu-cpp11:
   stage: build
   tags:

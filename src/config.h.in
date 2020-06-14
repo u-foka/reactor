@@ -20,8 +20,8 @@
 /* Project version */
 #define PROJECT_VERSION @PROJECT_VERSION@
 
-/* Static build */
-#cmakedefine REACTOR_STATIC
+/* Shared build */
+#cmakedefine REACTOR_SHARED
 
 /* Build date */
 #define BUILD_DATE @CURR_DATE@

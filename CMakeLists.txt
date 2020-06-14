@@ -33,11 +33,12 @@ else()
 set(REACTOR_BUILD_MODE "Standalone")
 endif()
 
-option(REACTOR_STATIC "Build static library" OFF)
-if (REACTOR_STATIC)
-  set(REACTOR_LIBRARY_TYPE "Static")
-else()
+option(BUILD_SHARED_LIBS "Build shared library" OFF)
+if (BUILD_SHARED_LIBS)
   set(REACTOR_LIBRARY_TYPE "Dynamic")
+  set(REACTOR_SHARED ON)
+else()
+  set(REACTOR_LIBRARY_TYPE "Static")
 endif()
 
 message("Configuring ${PROJECT_NAME} version ${PRODUCT_VERSION} in ${REACTOR_BUILD_MODE} mode as ${CMAKE_BUILD_TYPE} ${REACTOR_LIBRARY_TYPE} library")
@@ -85,10 +86,16 @@ if(MSVC)
 endif(MSVC)
 
 if(NOT HAS_PARENT)
-  # Setup googletest up here so it wont get our warning flags
-  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE) # Do not create install rules for gtest
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
-  add_subdirectory(thirdparty/googletest)
+  function(setup_gtest) # Function to have a separate scope
+      set(BUILD_SHARED_LIBS OFF) # Only disabled in the "gtest scope"
+
+      # Setup googletest up here so it wont get our warning flags
+      set(INSTALL_GTEST OFF CACHE BOOL "" FORCE) # Do not create install rules for gtest
+      set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Build googletest with shared runtime on windows
+      add_subdirectory(thirdparty/googletest)
+  endfunction()
+
+  setup_gtest()
 endif(NOT HAS_PARENT)
 
 include(enable_flag_if_supported)
@@ -106,13 +113,6 @@ include(forward_to_parent)
 
 include_directories("include")
 
-configure_file(src/config.h.in config.h)
-if(MSVC)
-  add_definitions(/FI "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
-else(MSVC)
-  add_definitions(-include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
-endif(MSVC)
-
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEADERS "src/*.hpp" "include/reactor/*.hpp")
 
@@ -120,23 +120,28 @@ set(FORMAT_FILES ${SOURCES} ${HEADERS})
 
 include_directories(${ROOT_SOURCE_DIR})
 
-if(REACTOR_STATIC)
-  add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-else(REACTOR_STATIC)
-  # To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
-  # See https://cmake.org/cmake/help/v3.4/variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS.html
-  # See https://blog.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+# To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
+# See https://cmake.org/cmake/help/v3.4/variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS.html
+# See https://blog.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-  add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
+configure_file(src/config.h.in config.h)
+if(MSVC)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE /FI "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+else(MSVC)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE -include "\"${CMAKE_CURRENT_BINARY_DIR}/config.h\"")
+endif(MSVC)
+
+if(REACTOR_SHARED)
   # This will name the output .so files "libsomething.1.0" which is pretty useful
   set_target_properties(${PROJECT_NAME} PROPERTIES 
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_SOVERSION})
-endif(REACTOR_STATIC)
+endif(REACTOR_SHARED)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
+#target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
 
 if(NOT HAS_PARENT)
   # Version file generation for packaging
