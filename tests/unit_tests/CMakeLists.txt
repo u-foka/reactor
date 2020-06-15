@@ -24,6 +24,9 @@ set(TEST_NAME ${PROJECT_NAME}_test)
 
 add_executable(${TEST_NAME} ${TEST_SOURCES} ${TEST_HEADERS} ${MOCK_SOURCES} ${MOCK_HEADERS})
 target_sources(${TEST_NAME} PRIVATE $<TARGET_OBJECTS:test_lib>)
+if(REACTOR_SHARED)
+	target_compile_definitions(${TEST_NAME} PRIVATE REACTOR_SHARED)
+endif(REACTOR_SHARED)
 target_link_libraries(${TEST_NAME} PRIVATE ${REACTOR_LIBRARY} gmock gtest Threads::Threads)
 target_code_coverage(${TEST_NAME} AUTO ALL EXCLUDE tests/* thirdparty/*)
 

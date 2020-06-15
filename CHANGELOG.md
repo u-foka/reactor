@@ -7,6 +7,7 @@ Reactor Changelog
 
 v2.3-next
 --------
+- respect cmake's BUILD_SHARED_LIBS option
 - `callback_holder` improvements
   - Separate types to support forwarding rvalue reference arguments to a single callback or coying arguments to multiple arguments
   - __[B]__ Locking in `callback_holder` is now optional (default off now)
