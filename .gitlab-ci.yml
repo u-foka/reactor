@@ -422,7 +422,7 @@ release-test-msvc:
     - call "%VCVARSALL%" x64
     - mkdir build
     - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check
 
 build-msvc-shared:
@@ -467,7 +467,7 @@ release-test-msvc-shared:
     - call "%VCVARSALL%" x64
     - mkdir build
     - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=On ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=On ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check
 
 build-ubuntu-cpp11:
@@ -638,7 +638,7 @@ release-test-msvc-cpp11:
     - call "%VCVARSALL%" x64
     - mkdir build
     - cd build
-    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
+    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
     - cmake --build . --target check
 
 pack:
