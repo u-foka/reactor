@@ -27,7 +27,4 @@
 #define BUILD_DATE @CURR_DATE@
 #define BUILD_YEAR @CURR_YEAR@
 
-/* Source Root */
-#define PROJECT_SOURCE_ROOT_DIR "@PROJECT_SOURCE_ROOT_DIR@"
-
 #endif // CONFIG_HPP
