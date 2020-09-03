@@ -37,11 +37,12 @@ class pulley_base;
 template<typename T, pulley_type type>
 class pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>
 {
+ public:
+    T *get() const;
+
  protected:
    pulley_base() = delete;
    explicit pulley_base(const typed_contract<T> &contract);
-
-   T *get() const;
 
  private:
    const typed_contract<T> &_contract;
@@ -51,11 +52,12 @@ class pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>
 template<typename T, pulley_type type>
 class pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>
 {
+ public:
+   T *get() const;
+
  protected:
    pulley_base() = delete;
    explicit pulley_base(const typed_contract<T> &contract);
-
-   T *get() const;
 
  private:
    const typed_contract<T> &_contract;
@@ -65,11 +67,12 @@ class pulley_base<T, type, detail::enable_if_t<lazy_reference_pulley == type>>
 template<typename T, pulley_type type>
 class pulley_base<T, type, detail::enable_if_t<shared_ptr_pulley == type>>
 {
+ public:
+   T *get() const;
+
  protected:
    pulley_base() = delete;
    explicit pulley_base(const typed_contract<T> &contract);
-
-   T *get() const;
 
  private:
    const typed_contract<T> &_contract;
