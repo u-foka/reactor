@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <typeindex>
+#include <stdexcept>
 
 namespace iws {
 namespace reactor {
