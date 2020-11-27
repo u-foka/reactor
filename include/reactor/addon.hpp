@@ -25,6 +25,7 @@ class addon : public addon_base
 {
  public:
    addon(typename T::func &&addon_func);
+   addon(const typename T::func &addon_func);
 
    const typename T::func addon_func;
    virtual const std::type_info &get_type() const override;
@@ -35,6 +36,12 @@ class addon : public addon_base
 
 template<typename T>
 addon<T>::addon(typename T::func &&addon_func)
+      : addon_func(addon_func)
+{
+}
+
+template<typename T>
+addon<T>::addon(const typename T::func &addon_func)
       : addon_func(addon_func)
 {
 }
