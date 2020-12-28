@@ -3,14 +3,18 @@ Reactor Changelog
 
 #### Legend
 - __[B]__ Breaking API change
+- [F] Bufgix
 - [D] New deprecated API
 
 v2.3-next
 --------
-- respect cmake's BUILD_SHARED_LIBS option
+- __[B]__ respect cmake's BUILD_SHARED_LIBS option
+- A pulley::get() is now public, providing access to the raw pointer of the stored object
+- Addons can now be also created by copying a functor object (instead of move only)
 - `callback_holder` improvements
   - Separate types to support forwarding rvalue reference arguments to a single callback or coying arguments to multiple arguments
   - __[B]__ Locking in `callback_holder` is now optional (default off now)
+- [F] Added missing include <stdexcept> in factory_result.hpp
 - Introduced `CHANGELOG.md`
 
 v2.3
