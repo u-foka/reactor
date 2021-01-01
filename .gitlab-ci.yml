@@ -708,17 +708,14 @@ pack:
   tags:
     - docker
   image: registry.iwstudio.hu/iws/ubuild:latest
-  only:
-    - /^v\d/
-  except:
-    - branches
+  #only:
+  #  - /^v\d/
+  #except:
+  #  - branches
   dependencies: [] # Disable artifact restoration
   artifacts:
     paths:
       - build-pack/*.zip
   script:
-    - mkdir build-pack
-    - cd build-pack
-    - cmake ../ -DGENERATE_VERSION=ON
-    - cpack --config CPackSourceConfig.cmake
+    - ./pack.sh
 
