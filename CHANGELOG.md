@@ -6,7 +6,7 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
-v2.3-next
+v2.4
 --------
 - __[B]__ respect cmake's BUILD_SHARED_LIBS option
 - A pulley::get() is now public, providing access to the raw pointer of the stored object
