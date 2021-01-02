@@ -639,12 +639,12 @@ test-msvc:
   tags:
     - msvc
   dependencies: [] # Disable artifact restoration
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    TARGET: "check"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake ../ -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on msvc yet
-    - cmake --build . --target check
+    - ci.cmd
 
 release-test-msvc:
   stage: test
