@@ -15,6 +15,7 @@ v2.3-next
   - Separate types to support forwarding rvalue reference arguments to a single callback or coying arguments to multiple arguments
   - __[B]__ Locking in `callback_holder` is now optional (default off now)
 - [F] Added missing include <stdexcept> in factory_result.hpp
+- __[B]__  Minimum required cmake version is now 3.1
 - Introduced `CHANGELOG.md`
 
 v2.3
