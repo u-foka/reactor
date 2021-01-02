@@ -278,67 +278,79 @@ build-msvc:
   stage: build
   tags:
     - msvc
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Release"
+    SHARED_LIBS: "OFF"
+    CXX11: "OFF"
+    TARGET: "${CI_PROJECT_NAME}"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..\
-    - cmake --build . --target %CI_PROJECT_NAME%
+    - ci.cmd
     
 debug-build-msvc:
   stage: build
   tags:
     - msvc
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    SHARED_LIBS: "OFF"
+    CXX11: "OFF"
+    TARGET: "${CI_PROJECT_NAME}"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..\
-    - cmake --build . --target %CI_PROJECT_NAME%
+    - ci.cmd
     
 build-msvc-shared:
   stage: build
   tags:
     - msvc
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Release"
+    SHARED_LIBS: "ON"
+    CXX11: "OFF"
+    TARGET: "${CI_PROJECT_NAME}"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=On ..\
-    - cmake --build . --target %CI_PROJECT_NAME%
+    - ci.cmd
     
 debug-build-msvc-shared:
   stage: build
   tags:
     - msvc
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    SHARED_LIBS: "ON"
+    CXX11: "OFF"
+    TARGET: "${CI_PROJECT_NAME}"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=On ..\
-    - cmake --build . --target %CI_PROJECT_NAME%
+    - ci.cmd
     
 build-msvc-cpp11:
   stage: build
   tags:
     - msvc
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Release"
+    SHARED_LIBS: "OFF"
+    CXX11: "ON"
+    TARGET: "${CI_PROJECT_NAME}"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release ..\
-    - cmake --build . --target %CI_PROJECT_NAME%
+    - ci.cmd
     
 debug-build-msvc-cpp11:
   stage: build
   tags:
     - msvc
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    SHARED_LIBS: "OFF"
+    CXX11: "ON"
+    TARGET: "${CI_PROJECT_NAME}"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug ..\
-    - cmake --build . --target %CI_PROJECT_NAME%
+    - ci.cmd
     
 ##########
 #  TEST  #
@@ -642,6 +654,8 @@ test-msvc:
   variables:
     BUILD_DIR: "build"
     BUILD_TYPE: "Debug"
+    SHARED_LIBS: "OFF"
+    CXX11: "OFF"
     TARGET: "check"
   script:
     - ci.cmd
@@ -651,60 +665,70 @@ release-test-msvc:
   tags:
     - msvc
   dependencies: [] # Disable artifact restoration
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Release"
+    SSHARED_LIBS: "OFF"
+    CXX11: "OFF"
+    TARGET: "check"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
-    - cmake --build . --target check
+    - ci.cmd
 
 test-msvc-shared:
   stage: test
   tags:
     - msvc
   dependencies: [] # Disable artifact restoration
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    SHARED_LIBS: "ON"
+    CXX11: "OFF"
+    TARGET: "check"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=On ../ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
-    - cmake --build . --target check
+    - ci.cmd
 
 release-test-msvc-shared:
   stage: test
   tags:
     - msvc
   dependencies: [] # Disable artifact restoration
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Release"
+    SHARED_LIBS: "ON"
+    CXX11: "OFF"
+    TARGET: "check"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=On ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
-    - cmake --build . --target check
+    - ci.cmd
 
 test-msvc-cpp11:
   stage: test
   tags:
     - msvc
   dependencies: [] # Disable artifact restoration
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    SHARED_LIBS: "OFF"
+    CXX11: "ON"
+    TARGET: "check"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake ../ -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Debug # -DCODE_COVERAGE=ON # No code coverage on msvc yet
-    - cmake --build . --target check
+    - ci.cmd
 
 release-test-msvc-cpp11:
   stage: test
   tags:
     - msvc
   dependencies: [] # Disable artifact restoration
+  variables:
+    BUILD_DIR: "build"
+    BUILD_TYPE: "Debug"
+    SHARED_LIBS: "OFF"
+    CXX11: "ON"
+    TARGET: "check"
   script:
-    - call "%VCVARSALL%" x64
-    - mkdir build
-    - cd build
-    - cmake -G Ninja -DCXX11_ENABLED=ON -DCMAKE_BUILD_TYPE=Release ..\ # -DCODE_COVERAGE=ON # No code coverage on msvc yet
-    - cmake --build . --target check
+    - ci.cmd
 
 #########
 #  DOC  #
