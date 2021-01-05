@@ -49,7 +49,7 @@ class factory_registrator
     * Use this overload to register a default factory.
     */
    template<typename... Args>
-   factory_registrator(priorities priority, Args &&... args);
+   factory_registrator(priorities priority, Args &&...args);
 
    /**
     * @brief factory_registrator instance specific constructor
@@ -60,7 +60,7 @@ class factory_registrator
     * Use this overload to register a factory for a given instance name only.
     */
    template<typename... Args>
-   factory_registrator(const std::string &instance, priorities priority, Args &&... args);
+   factory_registrator(const std::string &instance, priorities priority, Args &&...args);
 
    ~factory_registrator();
 
@@ -73,7 +73,7 @@ class factory_registrator
 
 template<typename I, typename T, bool pass_name, bool unregister>
 template<typename... Args>
-factory_registrator<I, T, pass_name, unregister>::factory_registrator(priorities priority, Args &&... args)
+factory_registrator<I, T, pass_name, unregister>::factory_registrator(priorities priority, Args &&...args)
       : _name(std::string())
       , _priority(priority)
 {
@@ -84,7 +84,7 @@ factory_registrator<I, T, pass_name, unregister>::factory_registrator(priorities
 template<typename I, typename T, bool pass_name, bool unregister>
 template<typename... Args>
 factory_registrator<I, T, pass_name, unregister>::factory_registrator(
-      const std::string &instance, priorities priority, Args &&... args)
+      const std::string &instance, priorities priority, Args &&...args)
       : _name(instance)
       , _priority(priority)
 {

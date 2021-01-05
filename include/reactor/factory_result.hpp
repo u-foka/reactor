@@ -16,8 +16,8 @@
 #define __IWS_REACTOR_FACTORY_RESULT_HPP__
 
 #include <memory>
-#include <typeindex>
 #include <stdexcept>
+#include <typeindex>
 
 namespace iws {
 namespace reactor {

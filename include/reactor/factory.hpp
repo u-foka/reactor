@@ -45,7 +45,7 @@ class factory : public factory_base
     * @brief factory constructor
     * @param args arguments to be passed to the constructor of T.
     */
-   factory(Args &&... args);
+   factory(Args &&...args);
    /**
     * @brief produce a new object
     * @param instance is the name of the instance constructed
@@ -67,7 +67,7 @@ class factory : public factory_base
 // ----
 
 template<typename I, typename T, bool pass_name, typename... Args>
-factory<I, T, pass_name, Args...>::factory(Args &&... args)
+factory<I, T, pass_name, Args...>::factory(Args &&...args)
       : factory_base(typeid(I))
       , _args(std::forward<Args>(args)...)
 {

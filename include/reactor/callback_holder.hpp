@@ -111,7 +111,7 @@ class callback_holder_impl
       _list.clear();
    }
 
-   void operator()(Args &&... args)
+   void operator()(Args &&...args)
    {
       typename Locks::lock_shared lock(_mutex);
 
@@ -137,7 +137,7 @@ class callback_holder_impl
    std::map<size_t, value_type> _list;
    typename Locks::mutex _mutex;
 
-   void call(call_trait_t<CB_COPY_ARGS> /* dummy */, const Args &... args)
+   void call(call_trait_t<CB_COPY_ARGS> /* dummy */, const Args &...args)
    {
       for (auto it : _list)
       {
@@ -145,7 +145,7 @@ class callback_holder_impl
       }
    }
 
-   void call(call_trait_t<CB_FORWARD_ARGS> /* dummy */, Args &&... args)
+   void call(call_trait_t<CB_FORWARD_ARGS> /* dummy */, Args &&...args)
    {
       if (0 < _list.size())
       {
@@ -173,16 +173,17 @@ struct dummy_locks
 
 struct default_locks
 {
-    using mutex = pf::might_shared_mutex;
-    using lock_shared = pf::might_shared_lock<mutex>;
-    using lock_unique = std::unique_lock<mutex>;
+   using mutex = pf::might_shared_mutex;
+   using lock_shared = pf::might_shared_lock<mutex>;
+   using lock_unique = std::unique_lock<mutex>;
 };
 
 } // namespace callback_holder
 } // namespace detail
 
 template<typename... Args>
-using callback_holder = detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_COPY_ARGS, detail::callback_holder::dummy_locks, Args...>;
+using callback_holder = detail::callback_holder::callback_holder_impl<detail::callback_holder::CB_COPY_ARGS,
+      detail::callback_holder::dummy_locks, Args...>;
 
 template<typename... Args>
 using forwarding_callback_holder =

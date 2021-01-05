@@ -38,7 +38,7 @@ template<typename T, pulley_type type>
 class pulley_base<T, type, detail::enable_if_t<reference_pulley == type>>
 {
  public:
-    T *get() const;
+   T *get() const;
 
  protected:
    pulley_base() = delete;

@@ -79,7 +79,7 @@ struct reactor : public ::testing::Test
    {
     public:
       const std::tuple<Args...> args;
-      test(Args &&... args)
+      test(Args &&...args)
             : args(std::forward<Args>(args)...)
       {
       }
