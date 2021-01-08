@@ -6,8 +6,8 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
-v2.4-next
----------
+v2.4.1
+------
 - [F] Fix pulley contract potential crash. The contract in pulley now makes sure the global r is initialized before the contract tries to register itself.
 
 v2.4
