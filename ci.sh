@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 THREADS=$(grep -c processor /proc/cpuinfo)
 
 echo "Building reactor...";
