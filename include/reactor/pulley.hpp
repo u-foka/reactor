@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "contract.hpp"
+#include "pulley_contract.hpp"
 #include "r.hpp"
 #include "reactor.hpp"
 
@@ -83,7 +83,7 @@ template<typename T, pulley_type type = reference_pulley>
 class pulley : public pulley_base<T, type>
 {
  public:
-   static const contract<T> _contract;
+   static const pulley_contract<T> _contract;
 
    pulley();
 
@@ -139,11 +139,11 @@ T *pulley_base<T, type, detail::enable_if_t<shared_ptr_pulley == type>>::get() c
 }
 
 template<typename T, pulley_type type>
-const contract<T> pulley<T, type>::_contract;
+const pulley_contract<T> pulley<T, type>::_contract;
 
 template<typename T, pulley_type type>
 pulley<T, type>::pulley()
-      : pulley_base<T, type>(_contract)
+      : pulley_base<T, type>(_contract.get())
 {
 }
 
