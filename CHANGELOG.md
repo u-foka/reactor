@@ -6,8 +6,12 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
+v2.4-next
+---------
+- [F] Fix pulley contract potential crash. The contract in pulley now makes sure the global r is initialized before the contract tries to register itself.
+
 v2.4
---------
+----
 - __[B]__ respect cmake's BUILD_SHARED_LIBS option
 - A pulley::get() is now public, providing access to the raw pointer of the stored object
 - Addons can now be also created by copying a functor object (instead of move only)
