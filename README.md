@@ -12,6 +12,12 @@ Among other things reactor supports validating of dependencies, resetting all se
 factories. These help to write easily testable code, run all tests in a clean state and prevent crashes due to missing
 dependencies only detected on their first usage.
 
+Links
+-----
+
+- Original repository: https://gitlab.iwstudio.hu/u-foka/reactor
+- Mirrored to: https://github.com/u-foka/reactor
+
 Example usage
 -------------
 
