@@ -6,9 +6,16 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
+v2.4.1-next
+-----------
+- __[B]__ In addons, the required `interface` member is renamed to `intf` ang `get_interface_type()` functions are
+  renamed to `get_intf_type()`. This change was necessary to resolve a conflict with a macro `interface` defined in
+  `combaseapi.h` from Microsoft. Thanks M$... very well done :(
+
 v2.4.1
 ------
-- [F] Fix pulley contract potential crash. The contract in pulley now makes sure the global r is initialized before the contract tries to register itself.
+- [F] Fix pulley contract potential crash. The contract in pulley now makes sure the global r is initialized before the 
+  contract tries to register itself.
 
 v2.4
 ----
@@ -16,7 +23,8 @@ v2.4
 - A pulley::get() is now public, providing access to the raw pointer of the stored object
 - Addons can now be also created by copying a functor object (instead of move only)
 - `callback_holder` improvements
-  - Separate types to support forwarding rvalue reference arguments to a single callback or coying arguments to multiple arguments
+  - Separate types to support forwarding rvalue reference arguments to a single callback or coying arguments to multiple
+    arguments
   - __[B]__ Locking in `callback_holder` is now optional (default off now)
 - [F] Added missing include <stdexcept> in factory_result.hpp
 - __[B]__  Minimum required cmake version is now 3.1

@@ -68,7 +68,7 @@ struct reactor : public ::testing::Test
       virtual ~i_test() {}
       struct test_addon
       {
-         typedef i_test interface;
+         typedef i_test intf;
          typedef std::function<void(std::string)> func;
       };
       virtual int get_id() = 0;
@@ -463,7 +463,7 @@ TEST_F(reactor, addon_simple)
    for (auto &item : addons)
    {
       EXPECT_EQ(std::type_index(item.second->get_type()), std::type_index(typeid(i_test::test_addon)));
-      EXPECT_EQ(std::type_index(item.second->get_interface_type()), std::type_index(typeid(i_test)));
+      EXPECT_EQ(std::type_index(item.second->get_intf_type()), std::type_index(typeid(i_test)));
 
       item.second->addon_func("testing");
    }
@@ -504,7 +504,7 @@ TEST_F(reactor, addon_filter)
 
    auto filter = pf::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
    EXPECT_EQ(std::type_index(filter->get_type()), std::type_index(typeid(i_test::test_addon)));
-   EXPECT_EQ(std::type_index(filter->get_interface_type()), std::type_index(typeid(i_test)));
+   EXPECT_EQ(std::type_index(filter->get_intf_type()), std::type_index(typeid(i_test)));
 
    inst->register_addon_filter(std::string(), re::prio_test, std::move(filter));
 
