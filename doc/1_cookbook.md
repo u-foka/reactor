@@ -270,7 +270,7 @@ class i_example
 {
  public:
    struct example_addon {
-      typedef i_example interface;
+      typedef i_example intf;
       typedef std::function<void()> func;
    };
 ```

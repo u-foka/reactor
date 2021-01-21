@@ -29,7 +29,7 @@ class addon : public addon_base
 
    const typename T::func addon_func;
    virtual const std::type_info &get_type() const override;
-   virtual const std::type_info &get_interface_type() const override;
+   virtual const std::type_info &get_intf_type() const override;
 };
 
 // ----
@@ -53,9 +53,9 @@ const std::type_info &addon<T>::get_type() const
 }
 
 template<typename T>
-const std::type_info &addon<T>::get_interface_type() const
+const std::type_info &addon<T>::get_intf_type() const
 {
-   return typeid(typename T::interface);
+   return typeid(typename T::intf);
 }
 
 } // namespace reactor

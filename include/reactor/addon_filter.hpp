@@ -35,7 +35,7 @@ class addon_filter : public addon_filter_base
 
    const func filter_func;
    virtual const std::type_info &get_type() const override;
-   virtual const std::type_info &get_interface_type() const override;
+   virtual const std::type_info &get_intf_type() const override;
 };
 
 // ----
@@ -53,9 +53,9 @@ const std::type_info &addon_filter<T>::get_type() const
 }
 
 template<typename T>
-const std::type_info &addon_filter<T>::get_interface_type() const
+const std::type_info &addon_filter<T>::get_intf_type() const
 {
-   return typeid(typename T::interface);
+   return typeid(typename T::intf);
 }
 
 } // namespace reactor
