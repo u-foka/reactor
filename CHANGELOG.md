@@ -6,7 +6,7 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
-v2.4.1-next
+v2.5
 -----------
 - __[B]__ In addons, the required `interface` member is renamed to `intf` ang `get_interface_type()` functions are
   renamed to `get_intf_type()`. This change was necessary to resolve a conflict with a macro `interface` defined in
