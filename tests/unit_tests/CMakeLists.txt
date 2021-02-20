@@ -12,13 +12,9 @@ file(GLOB TEST_SOURCES *.cpp)
 file(GLOB TEST_HEADERS *.hpp)
 list(APPEND FORMAT_FILES ${TEST_SOURCES} ${TEST_HEADERS})
 
-file(GLOB_RECURSE MOCK_SOURCES ${ROOT_SOURCE_DIR}/mocks/*.cpp)
-file(GLOB_RECURSE MOCK_HEADERS ${ROOT_SOURCE_DIR}/mocks/*.hpp)
-list(APPEND FORMAT_FILES ${MOCK_SOURCES} ${MOCK_HEADERS})
-
 forward_to_parent(FORMAT_FILES)
 
-include_directories(include_directories(${PROJECT_SOURCE_ROOT_DIR}))
+include_directories(${PROJECT_SOURCE_ROOT_DIR})
 
 set(TEST_NAME ${PROJECT_NAME}_test)
 
