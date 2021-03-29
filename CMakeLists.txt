@@ -165,6 +165,10 @@ if(NOT HAS_PARENT)
   )
   include(CPack)
 
+  include(code-coverage)
+  add_code_coverage_all_targets(EXCLUDE tests/* thirdparty/*)
+  target_code_coverage(${PROJECT_NAME} AUTO ALL EXCLUDE tests/* thirdparty/*)
+
   # In standalone mode setup the testing and maintenance targets
   enable_testing()
 

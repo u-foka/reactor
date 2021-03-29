@@ -5,9 +5,6 @@ add_subdirectory("test_lib")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-include(code-coverage)
-add_code_coverage_all_targets()
-
 file(GLOB TEST_SOURCES *.cpp)
 file(GLOB TEST_HEADERS *.hpp)
 list(APPEND FORMAT_FILES ${TEST_SOURCES} ${TEST_HEADERS})
