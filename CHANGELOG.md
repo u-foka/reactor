@@ -6,6 +6,10 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
+v2.5-next
+-----------
+__[F]__ Fix build on newer clang
+
 v2.5
 -----------
 - __[B]__ In addons, the required `interface` member is renamed to `intf` ang `get_interface_type()` functions are

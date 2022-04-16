@@ -39,6 +39,7 @@ class might_shared_lock : public std::unique_lock<T>
 } // namespace iws
 
 #else // target >= C++14
+#include <mutex>
 #include <shared_mutex>
 
 namespace iws {
