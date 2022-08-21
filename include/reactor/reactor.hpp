@@ -36,6 +36,7 @@
 #include "type_already_registred_exception.hpp"
 #include "typed_contract.hpp"
 #include "utils.hpp"
+#include "id_holder.hpp"
 
 namespace iws {
 namespace reactor {
@@ -70,10 +71,50 @@ class reactor
     */
    void register_factory(
          const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory);
+   /**
+    * @brief unregister an alrady registered factory
+    * 
+    * @param instance should be the same value which is used to register the factory need to be unregistered.
+    * @param priority should be the same value which is used to register the factory need to be unregistered.
+    * @param type should match the value that the factory -which need to be unregistered- returns through get_type().
+    */
    void unregister_factory(const std::string &instance, priorities priority, const std::type_info &type);
 
-   void register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon);
-   void unregister_addon(const std::string &instance, priorities priority, const std::type_info &type);
+   /**
+    * @brief registers a new addon. More on addons: //TODO link to the addon chapter...
+    * 
+    * @param instance the instance name that should use this addon.
+    *          Can be empty that means the addon will be used by the default instance.
+    * @param priority the priority of the addon (all addons will be called, the priority alters the ordering)
+    * @param addon rvalue reference to an unique_ptr containing the addon
+    * @return a registration id as size_t that can be used to unregister the addon just registered.
+    */
+   size_t register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon);
+   /**
+    * @brief unregister all alrady registered addons for a given instance + type combination.
+    * 
+    * @param instance should be the same value which is used to register the addons need to be unregistered.
+    * @param type should match the value that the addons -which need to be unregistered- returns through get_type().
+    * @return the number of unregistered addons as size_t
+    */
+   size_t unregister_addons(const std::string &instance, const std::type_info &type);
+   /**
+    * @brief unregister all alrady registered addons for a given instance + priority + type combination.
+    * 
+    * @param instance should be the same value which is used to register the addons need to be unregistered.
+    * @param priority should be the same value which is used to register the addons need to be unregistered.
+    * @param type should match the value that the addons -which need to be unregistered- returns through get_type().
+    * @return the number of unregistered addons as size_t
+    */
+   size_t unregister_addons(const std::string &instance, priorities priority, const std::type_info &type);
+   /**
+    * @brief unregister an already registered addon
+    * 
+    * @param instance should be the same value which is used to register the addon need to be unregistered.
+    * @param type should match the value that the addon -which need to be unregistered- returns through get_type().
+    * @param reg_id should match the registration id returned by register_addon when registering the addon.
+    */
+   void unregister_addon(const std::string &instance, const std::type_info &type, size_t reg_id);
 
    void register_addon_filter(
          const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter);
@@ -104,13 +145,15 @@ class reactor
  private:
    typedef std::map<priorities, std::shared_ptr<factory_base>>
          priorities_map; // Must be shared_ptr so get() can safely
-                         // release the factory read mutex while creating he object to avoid recursive locking of the
+                         // release the factory read mutex while creating the object to avoid recursive locking of the
                          // shared mutex
    typedef std::map<index, priorities_map> factory_map;
    typedef std::map<index, std::shared_ptr<void>> object_map;
    typedef std::vector<std::shared_ptr<void>> object_list;
    typedef std::vector<index> wip_list;
-   typedef std::multimap<priorities, std::unique_ptr<addon_base>> addon_priority_map;
+   typedef std::unique_ptr<addon_base> addon_ptr;
+   typedef id_holder<size_t, addon_ptr> addon_holder;
+   typedef std::multimap<priorities, addon_holder> addon_priority_map;
    typedef std::map<index, addon_priority_map> addon_map;
    typedef std::multimap<priorities, std::unique_ptr<addon_filter_base>> addon_filter_priority_map;
    typedef std::map<index, addon_filter_priority_map> addon_filter_map;
@@ -121,7 +164,9 @@ class reactor
    wip_list _wip_list;
    contract_list _contract_list;
    addon_map _addon_map;
+   std::atomic_size_t _addon_id;
    addon_filter_map _addon_filter_map;
+   std::atomic_size_t _addon_filter_id;
 
    pf::might_shared_mutex _factory_mutex;
    pf::might_shared_mutex _addon_mutex;
@@ -258,7 +303,7 @@ typename addon_func_map<T>::type reactor::get_addons(const std::string &instance
 
    for (auto &item : _addon_map[index{typeid(T), instance}])
    {
-      result.insert({item.first, dynamic_cast<addon<T> *>(item.second.get())});
+      result.insert({item.first, dynamic_cast<addon<T> *>(item.second.value.get())});
    }
 
    for (auto &filter : _addon_filter_map[index{typeid(T), instance}])

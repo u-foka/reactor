@@ -468,8 +468,7 @@ TEST_F(reactor, addon_simple)
       item.second->addon_func("testing");
    }
 
-   EXPECT_THROW(inst->unregister_addon(std::string(), re::prio_override, typeid(i_test::test_addon)),
-         re::addon_not_registred_exception);
+   EXPECT_EQ(inst->unregister_addons(std::string(), re::prio_override, typeid(i_test::test_addon)), 0ul);
    EXPECT_THROW(inst->unregister_factory(std::string(), re::prio_normal, typeid(std::string)),
          re::factory_not_registred_exception);
    EXPECT_THROW(inst->unregister_factory("no_inst", re::prio_normal, typeid(i_test::test_addon)),
@@ -477,11 +476,88 @@ TEST_F(reactor, addon_simple)
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
-   inst->unregister_addon(std::string(), re::prio_normal, typeid(i_test::test_addon));
+   EXPECT_EQ(inst->unregister_addons(std::string(), re::prio_normal, typeid(i_test::test_addon)), 1ul);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
 }
 
+TEST_F(reactor, addon_remove_one)
+{
+   // Create mocks
+   mock_test_addon addon_mock1;
+   std::function<void(std::string)> addon_fun1 = std::bind(&mock_test_addon::doit, &addon_mock1, sph::_1);
+   mock_test_addon addon_mock2;
+   std::function<void(std::string)> addon_fun2 = std::bind(&mock_test_addon::doit, &addon_mock2, sph::_1);
+   mock_test_addon addon_mock3;
+   std::function<void(std::string)> addon_fun3 = std::bind(&mock_test_addon::doit, &addon_mock3, sph::_1);
+   
+   // Set expectations
+   EXPECT_CALL(addon_mock1, doit("testing")).Times(1);
+   EXPECT_CALL(addon_mock2, doit("testing")).Times(3);
+   EXPECT_CALL(addon_mock3, doit("testing")).Times(2);
+
+   // Register all
+   size_t reg1 = inst->register_addon(
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun1)));
+   size_t reg2 = inst->register_addon(
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun2)));
+   size_t reg3 = inst->register_addon(
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun3)));
+
+   // Run them (all)
+   auto addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 3ul);
+   for (auto &item : addons)
+   {
+      item.second->addon_func("testing");
+   }
+
+   // Unregister 1
+   inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg1);
+
+   // Run them (2,3)
+   addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 2ul);
+   for (auto &item : addons)
+   {
+      item.second->addon_func("testing");
+   }
+
+   // Unregister 3
+   inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg3);
+
+   // Run them (only 2)
+   addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 1ul);
+   for (auto &item : addons)
+   {
+      item.second->addon_func("testing");
+   }
+
+   // Unregister 2
+   inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg2);
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+}
+/* TODO test ordering of test and override addons
+TEST_F(reactor, addon_order)
+{
+   mock_test_addon addon_mock;
+   std::function<void(std::string)> addon_fun = std::bind(&mock_test_addon::doit, &addon_mock, sph::_1);
+
+   EXPECT_CALL(addon_mock, doit("testing")).Times(1);
+
+   inst->register_addon(
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
+
+   auto addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 1ul);
+   for (auto &item : addons)
+   {
+      item.second->addon_func("testing");
+   }
+}
+*/
 TEST_F(reactor, addon_filter)
 {
    mock_test_addon addon_mock_norm;
