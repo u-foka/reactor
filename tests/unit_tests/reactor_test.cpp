@@ -22,6 +22,7 @@ namespace sph = std::placeholders;
 
 using testing::_;
 using testing::Invoke;
+using ::testing::InSequence;
 
 namespace re = iws::reactor;
 namespace pf = iws::polyfil;
@@ -539,25 +540,41 @@ TEST_F(reactor, addon_remove_one)
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
 }
-/* TODO test ordering of test and override addons
+
 TEST_F(reactor, addon_order)
 {
-   mock_test_addon addon_mock;
-   std::function<void(std::string)> addon_fun = std::bind(&mock_test_addon::doit, &addon_mock, sph::_1);
+   // Create mocks
+   mock_test_addon addon_mock1;
+   std::function<void(std::string)> addon_fun1 = std::bind(&mock_test_addon::doit, &addon_mock1, sph::_1);
+   mock_test_addon addon_mock2;
+   std::function<void(std::string)> addon_fun2 = std::bind(&mock_test_addon::doit, &addon_mock2, sph::_1);
+   mock_test_addon addon_mock3;
+   std::function<void(std::string)> addon_fun3 = std::bind(&mock_test_addon::doit, &addon_mock3, sph::_1);
+   mock_test_addon addon_mock4;
+   std::function<void(std::string)> addon_fun4 = std::bind(&mock_test_addon::doit, &addon_mock4, sph::_1);
 
-   EXPECT_CALL(addon_mock, doit("testing")).Times(1);
+   InSequence seq;
+   EXPECT_CALL(addon_mock4, doit("testing")).Times(1);
+   EXPECT_CALL(addon_mock2, doit("testing")).Times(1);
+   EXPECT_CALL(addon_mock3, doit("testing")).Times(1);
+   EXPECT_CALL(addon_mock1, doit("testing")).Times(1);
 
    inst->register_addon(
-         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun)));
+         std::string(), re::prio_test, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun1)));
+   inst->register_addon(
+         std::string(), re::prio_normal, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun2)));
+   inst->register_addon(
+         std::string(), re::prio_override, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun3)));
+   inst->register_addon(
+         std::string(), re::prio_fallback, pf::make_unique<re::addon<i_test::test_addon>>(std::move(addon_fun4)));
 
    auto addons = inst->get_addons<i_test::test_addon>();
-   EXPECT_EQ(addons.size(), 1ul);
    for (auto &item : addons)
    {
       item.second->addon_func("testing");
    }
 }
-*/
+
 TEST_F(reactor, addon_filter)
 {
    mock_test_addon addon_mock_norm;
