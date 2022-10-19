@@ -9,6 +9,7 @@ Reactor Changelog
 v2.5-next
 -----------
 __[F]__ Fix build on newer clang
+__[F]__ Fix building shared library on windows
 
 v2.5
 -----------
