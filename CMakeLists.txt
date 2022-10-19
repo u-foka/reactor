@@ -141,7 +141,7 @@ if(REACTOR_SHARED)
     SOVERSION ${PROJECT_SOVERSION})
 endif(REACTOR_SHARED)
 
-#target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
+target_compile_definitions(${PROJECT_NAME} PRIVATE REACTOR_LIBRARY)
 
 if(NOT HAS_PARENT)
   # Version file generation for packaging
