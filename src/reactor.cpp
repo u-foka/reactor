@@ -192,16 +192,19 @@ void reactor::unregister_addon(const std::string &instance, const std::type_info
    }
 }
 
-void reactor::register_addon_filter(
+size_t reactor::register_addon_filter(
       const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(filter->get_type(), instance);
-   _addon_filter_map[id].insert({priority, std::move(filter)});
+   const size_t reg_id = _addon_filter_id++;
+   _addon_filter_map[id].emplace(priority, addon_filter_holder{reg_id, std::move(filter)});
+
+   return reg_id;
 }
 
-void reactor::unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type)
+void reactor::unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 

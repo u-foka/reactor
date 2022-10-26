@@ -116,9 +116,28 @@ class reactor
     */
    void unregister_addon(const std::string &instance, const std::type_info &type, size_t reg_id);
 
-   void register_addon_filter(
+   /**
+    * @brief registers a new addon filter. More on addons: //TODO link to the addon chapter...
+    * 
+    * @param instance the instance name that should use this addon filter.
+    *          Can be empty that means the addon will be used by the default instance.
+    * @param priority the priority of the addon (all addons will be called, the priority alters the ordering)
+    * @param filter rvalue reference to an unique_ptr containing the addon filter
+    * @return a registration id as size_t that can be used to unregister the addon just registered.
+    */
+   size_t register_addon_filter(
          const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter);
-   void unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type);
+   /**
+    * @brief unregister all alrady registered addon filters for a given instance + priority + type combination.
+    * 
+    * @param instance should be the same value which is used to register the addon filters need to be unregistered.
+    * @param priority should be the same value which is used to register the addon filters need to be unregistered.
+    * @param type should match the value that the addon filters -which need to be unregistered- returns through
+    *          get_type().
+    * @return the number of unregistered addon filters as size_t
+    */
+   void unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type);
+   // TODO: Other versions of unregister_addon_filter(s)
 
    template<typename T>
    bool instance_exists(const typed_contract<T> &contract);
@@ -155,7 +174,9 @@ class reactor
    typedef id_holder<size_t, addon_ptr> addon_holder;
    typedef std::multimap<priorities, addon_holder> addon_priority_map;
    typedef std::map<index, addon_priority_map> addon_map;
-   typedef std::multimap<priorities, std::unique_ptr<addon_filter_base>> addon_filter_priority_map;
+   typedef std::unique_ptr<addon_filter_base> addon_filter_ptr;
+   typedef id_holder<size_t, addon_filter_ptr> addon_filter_holder;
+   typedef std::multimap<priorities, addon_filter_holder> addon_filter_priority_map;
    typedef std::map<index, addon_filter_priority_map> addon_filter_map;
 
    factory_map _factory_map;
@@ -308,7 +329,7 @@ typename addon_func_map<T>::type reactor::get_addons(const std::string &instance
 
    for (auto &filter : _addon_filter_map[index{typeid(T), instance}])
    {
-      dynamic_cast<addon_filter<T> *>(filter.second.get())->filter_func(result);
+      dynamic_cast<addon_filter<T> *>(filter.second.value.get())->filter_func(result);
    }
 
    return result;

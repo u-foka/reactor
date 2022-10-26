@@ -608,16 +608,16 @@ TEST_F(reactor, addon_filter)
       item.second->addon_func("testing");
    }
 
-   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_override, typeid(i_test::test_addon)),
+   EXPECT_THROW(inst->unregister_addon_filters(std::string(), re::prio_override, typeid(i_test::test_addon)),
          re::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filter(std::string(), re::prio_test, typeid(std::string)),
+   EXPECT_THROW(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(std::string)),
          re::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filter("no_inst", re::prio_test, typeid(i_test::test_addon)),
+   EXPECT_THROW(inst->unregister_addon_filters("no_inst", re::prio_test, typeid(i_test::test_addon)),
          re::addon_filter_not_registred_exception);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
-   inst->unregister_addon_filter(std::string(), re::prio_test, typeid(i_test::test_addon));
+   inst->unregister_addon_filters(std::string(), re::prio_test, typeid(i_test::test_addon));
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 }
