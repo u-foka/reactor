@@ -136,7 +136,7 @@ class reactor
     *          get_type().
     * @return the number of unregistered addon filters as size_t
     */
-   void unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type);
+   size_t unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type);
    // TODO: Other versions of unregister_addon_filter(s)
 
    template<typename T>
