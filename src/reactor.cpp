@@ -204,6 +204,30 @@ size_t reactor::register_addon_filter(
    return reg_id;
 }
 
+size_t reactor::unregister_addon_filters(const std::string &instance, const std::type_info &type)
+{
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_filter_map.find(id);
+   if (it == _addon_filter_map.end())
+   {
+      // No addon filter found for the given parameters
+      return 0;
+   }
+
+   auto &prio_map = it->second;
+
+   size_t num_erased = prio_map.size();
+   prio_map.clear();
+   
+   // The prio_map is empty, let's remove the item from the addon_filter_map too
+   _addon_filter_map.erase(it);
+
+   return num_erased;
+}
+
 size_t reactor::unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
@@ -214,7 +238,7 @@ size_t reactor::unregister_addon_filters(const std::string &instance, priorities
    if (it == _addon_filter_map.end())
    {
       // No addon_filter found for the given parameters
-      throw addon_filter_not_registred_exception(type, instance);
+      return 0;
    }
 
    auto &prio_map = it->second;
@@ -228,6 +252,38 @@ size_t reactor::unregister_addon_filters(const std::string &instance, priorities
    }
 
    return num_erased;
+}
+
+void reactor::unregister_addon_filter(const std::string &instance, const std::type_info &type, size_t reg_id)
+{
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_filter_map.find(id);
+   if (it == _addon_filter_map.end())
+   {
+      // No addon filter found for the given parameters
+      throw addon_filter_not_registred_exception(type, instance);
+   }
+
+   auto &prio_map = it->second;
+
+   auto it_prio = std::find_if(prio_map.begin(), prio_map.end(),
+         [reg_id](auto &item){ return item.second.id == reg_id; });
+   if (it_prio == prio_map.end())
+   {
+      // No addon filter found for the given parameters
+      throw addon_filter_not_registred_exception(type, instance);
+   }
+
+   prio_map.erase(it_prio);
+
+   if (prio_map.empty())
+   {
+      // The prio_map is empty, let's remove the item from the addon_filter_map too
+      _addon_filter_map.erase(it);
+   }
 }
 
 void reactor::reset_objects()

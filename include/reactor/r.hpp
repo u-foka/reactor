@@ -34,8 +34,10 @@ class init
    init();
    ~init();
 
+   size_t get_instance_count() const;
+
  private:
-   static std::atomic<int> instance_count;
+   static std::atomic<size_t> instance_count;
 };
 
 class reactor;

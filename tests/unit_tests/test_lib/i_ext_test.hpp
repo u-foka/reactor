@@ -1,5 +1,5 @@
-#ifndef __IWS_REACTOR_I_TEST_HPP__
-#define __IWS_REACTOR_I_TEST_HPP__
+#ifndef __IWS_REACTOR_I_EXT_TEST_HPP__
+#define __IWS_REACTOR_I_EXT_TEST_HPP__
 
 namespace iws {
 namespace reactor_test {
@@ -14,4 +14,4 @@ class i_ext_test
 } // namespace reactor_test
 } // namespace iws
 
-#endif // __IWS_REACTOR_I_TEST_HPP__
+#endif // __IWS_REACTOR_I_EXT_TEST_HPP__

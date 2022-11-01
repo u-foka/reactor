@@ -71,6 +71,7 @@ class reactor
     */
    void register_factory(
          const std::string &instance, priorities priority, const std::shared_ptr<factory_base> &factory);
+
    /**
     * @brief unregister an alrady registered factory
     * 
@@ -90,6 +91,7 @@ class reactor
     * @return a registration id as size_t that can be used to unregister the addon just registered.
     */
    size_t register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon);
+
    /**
     * @brief unregister all alrady registered addons for a given instance + type combination.
     * 
@@ -98,6 +100,7 @@ class reactor
     * @return the number of unregistered addons as size_t
     */
    size_t unregister_addons(const std::string &instance, const std::type_info &type);
+
    /**
     * @brief unregister all alrady registered addons for a given instance + priority + type combination.
     * 
@@ -107,6 +110,7 @@ class reactor
     * @return the number of unregistered addons as size_t
     */
    size_t unregister_addons(const std::string &instance, priorities priority, const std::type_info &type);
+
    /**
     * @brief unregister an already registered addon
     * 
@@ -127,6 +131,17 @@ class reactor
     */
    size_t register_addon_filter(
          const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter);
+
+   /**
+    * @brief unregister all alrady registered addon filters for a given instance + type combination.
+    * 
+    * @param instance should be the same value which is used to register the addon filters need to be unregistered.
+    * @param type should match the value that the addon filters -which need to be unregistered- returns through
+    *          get_type().
+    * @return the number of unregistered addon filters as size_t
+    */
+   size_t unregister_addon_filters(const std::string &instance, const std::type_info &type);
+
    /**
     * @brief unregister all alrady registered addon filters for a given instance + priority + type combination.
     * 
@@ -137,7 +152,18 @@ class reactor
     * @return the number of unregistered addon filters as size_t
     */
    size_t unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type);
-   // TODO: Other versions of unregister_addon_filter(s)
+
+   /**
+    * @brief unregister an already registered addon filter
+    * 
+    * @param instance should be the same value which is used to register the addon filter need to be unregistered.
+    * @param type should match the value that the addon filter -which need to be unregistered- returns through
+    *          get_type().
+    * @param reg_id should match the registration id returned by register_addon_filter when registering the
+    *          addon filter.
+    */
+   void unregister_addon_filter(const std::string &instance, const std::type_info &type, size_t reg_id);
+
 
    template<typename T>
    bool instance_exists(const typed_contract<T> &contract);

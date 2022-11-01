@@ -25,7 +25,7 @@ reactor &r = reinterpret_cast<reactor &>(r_memory);
 
 // This is done before the dynamic initialization is started since
 // std::atomic<int> has a trivial constructor and initialized with a constexpr
-std::atomic<int> init::instance_count(0);
+std::atomic<size_t> init::instance_count(0);
 
 init::init()
 {
@@ -43,6 +43,11 @@ init::~init()
 
    // Destruct global instance
    r.~reactor();
+}
+
+size_t init::get_instance_count() const
+{
+   return instance_count;
 }
 
 } // namespace reactor

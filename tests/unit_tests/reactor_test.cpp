@@ -16,6 +16,8 @@
 #include <reactor/r.hpp>
 #include <reactor/reactor.hpp>
 
+#include "i_test.hpp"
+#include "test_contract.hpp"
 #include "test_lib/i_ext_test.hpp"
 
 namespace sph = std::placeholders;
@@ -26,6 +28,9 @@ using ::testing::InSequence;
 
 namespace re = iws::reactor;
 namespace pf = iws::polyfil;
+
+using iws::reactor_test::i_test;
+using iws::reactor_test::test_contract;
 
 struct reactor : public ::testing::Test
 {
@@ -63,18 +68,6 @@ struct reactor : public ::testing::Test
       }
    };
 
-   class i_test
-   {
-    public:
-      virtual ~i_test() {}
-      struct test_addon
-      {
-         typedef i_test intf;
-         typedef std::function<void(std::string)> func;
-      };
-      virtual int get_id() = 0;
-   };
-
    template<int id, typename... Args>
    class test : public i_test
    {
@@ -86,22 +79,6 @@ struct reactor : public ::testing::Test
       }
 
       int get_id() { return id; }
-   };
-
-   template<typename T>
-   class test_contract : public re::typed_contract<T>
-   {
-    public:
-      const re::index _index;
-
-      test_contract(const std::string &instance = std::string())
-            : re::typed_contract<T>(nullptr)
-            , _index(typeid(T), instance)
-      {
-      }
-
-      virtual const re::index &get_index() const override { return _index; }
-      virtual void try_get() override { throw std::logic_error("Not implemented"); }
    };
 
    template<typename T>
@@ -478,8 +455,10 @@ TEST_F(reactor, addon_simple)
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
    EXPECT_EQ(inst->unregister_addons(std::string(), re::prio_normal, typeid(i_test::test_addon)), 1ul);
-
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+
+   EXPECT_EQ(inst->unregister_addons(std::string(), typeid(i_test::test_addon)), 0ul);
+   EXPECT_EQ(inst->unregister_addons(std::string(), re::prio_normal, typeid(i_test::test_addon)), 0ul);
 }
 
 TEST_F(reactor, addon_remove_one)
@@ -494,8 +473,8 @@ TEST_F(reactor, addon_remove_one)
    
    // Set expectations
    EXPECT_CALL(addon_mock1, doit("testing")).Times(1);
-   EXPECT_CALL(addon_mock2, doit("testing")).Times(3);
-   EXPECT_CALL(addon_mock3, doit("testing")).Times(2);
+   EXPECT_CALL(addon_mock2, doit("testing")).Times(4);
+   EXPECT_CALL(addon_mock3, doit("testing")).Times(3);
 
    // Register all
    size_t reg1 = inst->register_addon(
@@ -524,6 +503,18 @@ TEST_F(reactor, addon_remove_one)
       item.second->addon_func("testing");
    }
 
+   // Unregister 1 again
+   EXPECT_THROW(inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg1),
+      re::addon_not_registred_exception);
+
+   // Run them (2,3)
+   addons = inst->get_addons<i_test::test_addon>();
+   EXPECT_EQ(addons.size(), 2ul);
+   for (auto &item : addons)
+   {
+      item.second->addon_func("testing");
+   }
+
    // Unregister 3
    inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg3);
 
@@ -539,6 +530,45 @@ TEST_F(reactor, addon_remove_one)
    inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg2);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+
+   // Unregister 2 again
+   EXPECT_THROW(inst->unregister_addon(std::string(), typeid(i_test::test_addon), reg2),
+      re::addon_not_registred_exception);
+}
+
+TEST_F(reactor, addon_remove_all)
+{
+   mock_test_addon addon_mock1;
+   std::function<void(std::string)> addon_fun1 = std::bind(&mock_test_addon::doit, &addon_mock1, sph::_1);
+   mock_test_addon addon_mock2;
+   std::function<void(std::string)> addon_fun2 = std::bind(&mock_test_addon::doit, &addon_mock2, sph::_1);
+
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>("inst").size(), 0ul);
+
+   inst->register_addon(std::string(), re::prio_test, pf::make_unique<re::addon<i_test::test_addon>>(
+      std::move(addon_fun1)));
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>("inst").size(), 0ul);
+   
+   inst->register_addon("inst", re::prio_test, pf::make_unique<re::addon<i_test::test_addon>>(
+      std::move(addon_fun2)));
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>("inst").size(), 1ul);
+
+   EXPECT_EQ(inst->unregister_addons(std::string(), typeid(i_test::test_addon)), 1ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>("inst").size(), 1ul);
+
+   EXPECT_EQ(inst->unregister_addons(std::string(), typeid(i_test::test_addon)), 0ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>("inst").size(), 1ul);
+
+   EXPECT_EQ(inst->unregister_addons("inst", typeid(i_test::test_addon)), 1ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 0ul);
+   EXPECT_EQ(inst->get_addons<i_test::test_addon>("inst").size(), 0ul);
+
+   EXPECT_EQ(inst->unregister_addons("inst", typeid(i_test::test_addon)), 0ul);
 }
 
 TEST_F(reactor, addon_order)
@@ -577,6 +607,9 @@ TEST_F(reactor, addon_order)
 
 TEST_F(reactor, addon_filter)
 {
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), -1),
+         re::addon_filter_not_registred_exception);
+
    mock_test_addon addon_mock_norm;
    EXPECT_CALL(addon_mock_norm, doit("testing")).Times(0);
    inst->register_addon(
@@ -608,18 +641,34 @@ TEST_F(reactor, addon_filter)
       item.second->addon_func("testing");
    }
 
-   EXPECT_THROW(inst->unregister_addon_filters(std::string(), re::prio_override, typeid(i_test::test_addon)),
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), -1),
          re::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(std::string)),
-         re::addon_filter_not_registred_exception);
-   EXPECT_THROW(inst->unregister_addon_filters("no_inst", re::prio_test, typeid(i_test::test_addon)),
-         re::addon_filter_not_registred_exception);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_override, typeid(i_test::test_addon)), 0);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(std::string)), 0);
+   EXPECT_EQ(inst->unregister_addon_filters("no_inst", re::prio_test, typeid(i_test::test_addon)), 0);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
-   inst->unregister_addon_filters(std::string(), re::prio_test, typeid(i_test::test_addon));
+   EXPECT_THROW(inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), -1),
+         re::addon_filter_not_registred_exception);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(i_test::test_addon)), 1);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
+}
+
+TEST_F(reactor, addon_filter_more_unregistrations)
+{
+   mock_test_addon_filter<i_test::test_addon> addon_filter_mock;
+   auto filter = pf::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
+   auto reg = inst->register_addon_filter(std::string(), re::prio_test, std::move(filter));
+
+   inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), reg);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 0);
+   
+   filter = pf::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
+   inst->register_addon_filter(std::string(), re::prio_test, std::move(filter));
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 1);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 0);
 }
 
 TEST_F(reactor, factory_result)
@@ -812,4 +861,26 @@ TEST_F(reactor, ext_impl)
    re::contract<iws::reactor_test::i_ext_test> ct;
 
    EXPECT_TRUE(re::r.get(ct).are_you_ext());
+}
+
+namespace iws {
+namespace reactor_test {
+
+int init_test_helper();
+
+} // namespace reactor_test
+} // namespace iws
+
+TEST_F(reactor, init)
+{
+   re::r.register_factory(std::string(), re::prio_normal, std::make_shared<re::factory<i_test, test<4242>, false>>());
+
+   EXPECT_EQ(4242, re::r.get(test_contract<i_test>()).get_id());
+   EXPECT_EQ(4242, iws::reactor_test::init_test_helper());
+
+   auto cnt = re::__init_reactor.get_instance_count();
+   const re::init init_test;
+   EXPECT_EQ(cnt + 1, init_test.get_instance_count());
+
+   re::r.unregister_factory(std::string(), re::prio_normal, typeid(i_test));
 }
