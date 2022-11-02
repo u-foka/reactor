@@ -6,7 +6,7 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
-v2.5-next
+v2.6
 -----------
 - [F] Fix build on newer clang
 - __[B]__ Fix addon ambiguity in addon and addon filter unregistration. This breaks the existing addon handling interface.
