@@ -8,9 +8,10 @@ Reactor Changelog
 
 v2.5-next
 -----------
-__[F]__ Fix build on newer clang
-__[B]__ Fix addon ambiguity in addon and addon filter unregistration. This breaks the existing addon handling interface.
-__[F]__ Fix building shared library on windows
+- [F] Fix build on newer clang
+- __[B]__ Fix addon ambiguity in addon and addon filter unregistration. This breaks the existing addon handling interface.
+- [F] Fix building shared library on windows
+- Make reactors read functions const
 
 v2.5
 -----------
