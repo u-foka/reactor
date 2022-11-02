@@ -315,7 +315,7 @@ void reactor::reset_objects()
    }
 }
 
-bool reactor::validate_contracts()
+bool reactor::validate_contracts() const
 {
    std::unique_lock<std::mutex> contract_lock(_contract_mutex);
 
@@ -336,7 +336,7 @@ bool reactor::validate_contracts()
    return true;
 }
 
-reactor::contract_list reactor::unsatisfied_contracts()
+reactor::contract_list reactor::unsatisfied_contracts() const
 {
    std::unique_lock<std::mutex> contract_lock(_contract_mutex);
 
@@ -360,7 +360,7 @@ reactor::contract_list reactor::unsatisfied_contracts()
    return list;
 }
 
-void reactor::test_all_contracts()
+void reactor::test_all_contracts() const
 {
    std::unique_lock<std::mutex> contract_lock(_contract_mutex);
 
@@ -370,7 +370,7 @@ void reactor::test_all_contracts()
    }
 }
 
-bool reactor::is_shutting_down()
+bool reactor::is_shutting_down() const
 {
    return _shutting_down;
 }

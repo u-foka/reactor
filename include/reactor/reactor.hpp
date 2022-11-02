@@ -166,7 +166,7 @@ class reactor
 
 
    template<typename T>
-   bool instance_exists(const typed_contract<T> &contract);
+   bool instance_exists(const typed_contract<T> &contract) const;
    template<typename T>
    T &get(const typed_contract<T> &contract);
    template<typename T>
@@ -174,16 +174,16 @@ class reactor
    void reset_objects();
 
    template<typename T>
-   typename addon_func_map<T>::type get_addons(const std::string &instance = std::string());
+   typename addon_func_map<T>::type get_addons(const std::string &instance = std::string()) const;
 
    threadsafe_callback_holder<> sig_before_reset_objects;
    threadsafe_callback_holder<> sig_after_reset_objects;
 
-   bool validate_contracts();
-   contract_list unsatisfied_contracts();
-   void test_all_contracts();
+   bool validate_contracts() const;
+   contract_list unsatisfied_contracts() const;
+   void test_all_contracts() const;
 
-   bool is_shutting_down();
+   bool is_shutting_down() const;
 
    const std::string &get_version() const;
 
@@ -216,11 +216,11 @@ class reactor
    std::atomic_size_t _addon_filter_id;
 
    pf::might_shared_mutex _factory_mutex;
-   pf::might_shared_mutex _addon_mutex;
-   pf::might_shared_mutex _object_map_mutex;
+   mutable pf::might_shared_mutex _addon_mutex;
+   mutable pf::might_shared_mutex _object_map_mutex;
    std::recursive_mutex _object_list_mutex; // also protects wip_list
    std::recursive_mutex _reset_objects_mutex;
-   std::mutex _contract_mutex;
+   mutable std::mutex _contract_mutex;
 
    std::atomic_bool _shutting_down;
 
@@ -232,7 +232,7 @@ class reactor
 // ----
 
 template<typename T>
-bool reactor::instance_exists(const typed_contract<T> &contract)
+bool reactor::instance_exists(const typed_contract<T> &contract) const
 {
    const index &id = contract.get_index();
 
@@ -344,18 +344,30 @@ std::shared_ptr<T> reactor::get_ptr(T &obj)
 }
 
 template<typename T>
-typename addon_func_map<T>::type reactor::get_addons(const std::string &instance)
+typename addon_func_map<T>::type reactor::get_addons(const std::string &instance) const
 {
+   pf::might_shared_lock<pf::might_shared_mutex> addon_read_lock(_addon_mutex);
+
    typename addon_func_map<T>::type result;
 
-   for (auto &item : _addon_map[index{typeid(T), instance}])
+   auto it = _addon_map.find(index{typeid(T), instance});
+   if (_addon_map.end() == it)
+   {
+      return result;
+   }
+
+   for (auto &item : it->second)
    {
       result.insert({item.first, dynamic_cast<addon<T> *>(item.second.value.get())});
    }
 
-   for (auto &filter : _addon_filter_map[index{typeid(T), instance}])
+   auto it_filter = _addon_filter_map.find(index{typeid(T), instance});
+   if (_addon_filter_map.end() != it_filter)
    {
-      dynamic_cast<addon_filter<T> *>(filter.second.value.get())->filter_func(result);
+      for (auto &filter : it_filter->second)
+      {
+         dynamic_cast<addon_filter<T> *>(filter.second.value.get())->filter_func(result);
+      }
    }
 
    return result;
