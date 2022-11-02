@@ -12,12 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __IWS_REACTOR_CLIENT_HPP__
-#define __IWS_REACTOR_CLIENT_HPP__
+#ifndef __IWS_REACTOR_ID_HOLDER_HPP__
+#define __IWS_REACTOR_ID_HOLDER_HPP__
 
-#include "contract.hpp"
-#include "pulley.hpp"
-#include "r.hpp"
-#include "reactor.hpp"
+namespace iws {
+namespace reactor {
 
-#endif // __IWS_REACTOR_CLIENT_HPP__
+// Yess... its a pair with names, but imagine putting a pair in a map
+// and accessing your data throught two layers of pairs.. :)
+template<typename ID_TYPE, typename VALUE_TYPE>
+struct id_holder
+{
+   ID_TYPE id;
+   VALUE_TYPE value;
+};
+
+} // namespace reactor
+} // namespace iws
+
+#endif //__IWS_REACTOR_ID_HOLDER_HPP__

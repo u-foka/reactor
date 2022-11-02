@@ -8,7 +8,7 @@ To achieve the above goal it binds factories to interface classes and when an in
 the already produced "service" or creates it if necessary. This basically means that each service behaves like a
 singleton, and their life-cycle is managed by reactor.
 
-Among other things reactor supports validating of dependencies, resetting all services, and overrides of service
+Among other things, reactor supports validating of dependencies, resetting all services, and overrides of service
 factories. These help to write easily testable code, run all tests in a clean state and prevent crashes due to missing
 dependencies only detected on their first usage.
 

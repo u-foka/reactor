@@ -1,4 +1,4 @@
-// Copyright 2021 Tamas Eisenberger <e.tamas@iwstudio.hu>
+// Copyright 2022 Tamas Eisenberger <e.tamas@iwstudio.hu>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -99,15 +99,68 @@ void reactor::unregister_factory(const std::string &instance, priorities priorit
    }
 }
 
-void reactor::register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon)
+size_t reactor::register_addon(const std::string &instance, priorities priority, std::unique_ptr<addon_base> &&addon)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(addon->get_type(), instance);
-   _addon_map[id].insert({priority, std::move(addon)});
+   const size_t reg_id = _addon_id++;
+   _addon_map[id].emplace(priority, addon_holder{reg_id, std::move(addon)});
+
+   return reg_id;
 }
 
-void reactor::unregister_addon(const std::string &instance, priorities priority, const std::type_info &type)
+size_t reactor::unregister_addons(const std::string &instance, const std::type_info &type)
+{
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_map.find(id);
+   if (it == _addon_map.end())
+   {
+      // No addon found for the given parameters
+      return 0;
+   }
+
+   auto &prio_map = it->second;
+
+   size_t num_erased = prio_map.size();
+   prio_map.clear();
+   
+   // The prio_map is empty, let's remove the item from the addon_map too
+   _addon_map.erase(it);
+
+   return num_erased;
+}
+
+size_t reactor::unregister_addons(const std::string &instance, priorities priority, const std::type_info &type)
+{
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_map.find(id);
+   if (it == _addon_map.end())
+   {
+      // No addon found for the given parameters
+      return 0;
+   }
+
+   auto &prio_map = it->second;
+
+   size_t num_erased = prio_map.erase(priority);
+
+   if (prio_map.empty())
+   {
+      // The prio_map is empty, let's remove the item from the addon_map too
+      _addon_map.erase(it);
+   }
+
+   return num_erased;
+}
+
+void reactor::unregister_addon(const std::string &instance, const std::type_info &type, size_t reg_id)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
@@ -122,14 +175,14 @@ void reactor::unregister_addon(const std::string &instance, priorities priority,
 
    auto &prio_map = it->second;
 
-   auto it_prio = prio_map.find(priority);
+   auto it_prio = std::find_if(prio_map.begin(), prio_map.end(),
+         [reg_id](auto &item){ return item.second.id == reg_id; });
    if (it_prio == prio_map.end())
    {
       // No addon found for the given parameters
       throw addon_not_registred_exception(type, instance);
    }
 
-   // Found the addon in prio_map, remove it!
    prio_map.erase(it_prio);
 
    if (prio_map.empty())
@@ -139,16 +192,43 @@ void reactor::unregister_addon(const std::string &instance, priorities priority,
    }
 }
 
-void reactor::register_addon_filter(
+size_t reactor::register_addon_filter(
       const std::string &instance, priorities priority, std::unique_ptr<addon_filter_base> &&filter)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
    const index id(filter->get_type(), instance);
-   _addon_filter_map[id].insert({priority, std::move(filter)});
+   const size_t reg_id = _addon_filter_id++;
+   _addon_filter_map[id].emplace(priority, addon_filter_holder{reg_id, std::move(filter)});
+
+   return reg_id;
 }
 
-void reactor::unregister_addon_filter(const std::string &instance, priorities priority, const std::type_info &type)
+size_t reactor::unregister_addon_filters(const std::string &instance, const std::type_info &type)
+{
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_filter_map.find(id);
+   if (it == _addon_filter_map.end())
+   {
+      // No addon filter found for the given parameters
+      return 0;
+   }
+
+   auto &prio_map = it->second;
+
+   size_t num_erased = prio_map.size();
+   prio_map.clear();
+   
+   // The prio_map is empty, let's remove the item from the addon_filter_map too
+   _addon_filter_map.erase(it);
+
+   return num_erased;
+}
+
+size_t reactor::unregister_addon_filters(const std::string &instance, priorities priority, const std::type_info &type)
 {
    std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
 
@@ -158,19 +238,45 @@ void reactor::unregister_addon_filter(const std::string &instance, priorities pr
    if (it == _addon_filter_map.end())
    {
       // No addon_filter found for the given parameters
+      return 0;
+   }
+
+   auto &prio_map = it->second;
+
+   size_t num_erased = prio_map.erase(priority);
+
+   if (prio_map.empty())
+   {
+      // The prio_map is empty, let's remove the item from the addon_filter_map too
+      _addon_filter_map.erase(it);
+   }
+
+   return num_erased;
+}
+
+void reactor::unregister_addon_filter(const std::string &instance, const std::type_info &type, size_t reg_id)
+{
+   std::unique_lock<pf::might_shared_mutex> addon_write_lock(_addon_mutex);
+
+   const index id(type, instance);
+
+   auto it = _addon_filter_map.find(id);
+   if (it == _addon_filter_map.end())
+   {
+      // No addon filter found for the given parameters
       throw addon_filter_not_registred_exception(type, instance);
    }
 
    auto &prio_map = it->second;
 
-   auto it_prio = prio_map.find(priority);
+   auto it_prio = std::find_if(prio_map.begin(), prio_map.end(),
+         [reg_id](auto &item){ return item.second.id == reg_id; });
    if (it_prio == prio_map.end())
    {
-      // No addon_filter found for the given parameters
+      // No addon filter found for the given parameters
       throw addon_filter_not_registred_exception(type, instance);
    }
 
-   // Found the addon_filter in prio_map, remove it!
    prio_map.erase(it_prio);
 
    if (prio_map.empty())
@@ -209,7 +315,7 @@ void reactor::reset_objects()
    }
 }
 
-bool reactor::validate_contracts()
+bool reactor::validate_contracts() const
 {
    std::unique_lock<std::mutex> contract_lock(_contract_mutex);
 
@@ -230,7 +336,7 @@ bool reactor::validate_contracts()
    return true;
 }
 
-reactor::contract_list reactor::unsatisfied_contracts()
+reactor::contract_list reactor::unsatisfied_contracts() const
 {
    std::unique_lock<std::mutex> contract_lock(_contract_mutex);
 
@@ -254,7 +360,7 @@ reactor::contract_list reactor::unsatisfied_contracts()
    return list;
 }
 
-void reactor::test_all_contracts()
+void reactor::test_all_contracts() const
 {
    std::unique_lock<std::mutex> contract_lock(_contract_mutex);
 
@@ -264,7 +370,7 @@ void reactor::test_all_contracts()
    }
 }
 
-bool reactor::is_shutting_down()
+bool reactor::is_shutting_down() const
 {
    return _shutting_down;
 }

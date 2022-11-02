@@ -1,3 +1,9 @@
 #!/bin/sh
-docker run --rm -v $(pwd):/workspace -ti registry.iwstudio.hu/iws/ubuild:latest bash -li
+
+IMAGE="$1"
+if [ -z "$IMAGE" ]; then
+   IMAGE="ubuild"
+fi
+
+docker run --rm -v "$(pwd):/workspace" -ti "registry.iwstudio.hu/iws/$IMAGE:latest" bash -li
 
