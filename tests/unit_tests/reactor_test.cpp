@@ -643,15 +643,15 @@ TEST_F(reactor, addon_filter)
 
    EXPECT_THROW(inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), -1),
          re::addon_filter_not_registred_exception);
-   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_override, typeid(i_test::test_addon)), 0);
-   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(std::string)), 0);
-   EXPECT_EQ(inst->unregister_addon_filters("no_inst", re::prio_test, typeid(i_test::test_addon)), 0);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_override, typeid(i_test::test_addon)), 0ul);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(std::string)), 0ul);
+   EXPECT_EQ(inst->unregister_addon_filters("no_inst", re::prio_test, typeid(i_test::test_addon)), 0ul);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 1ul);
 
    EXPECT_THROW(inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), -1),
          re::addon_filter_not_registred_exception);
-   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(i_test::test_addon)), 1);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), re::prio_test, typeid(i_test::test_addon)), 1ul);
 
    EXPECT_EQ(inst->get_addons<i_test::test_addon>().size(), 2ul);
 }
@@ -663,12 +663,12 @@ TEST_F(reactor, addon_filter_more_unregistrations)
    auto reg = inst->register_addon_filter(std::string(), re::prio_test, std::move(filter));
 
    inst->unregister_addon_filter(std::string(), typeid(i_test::test_addon), reg);
-   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 0);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 0ul);
    
    filter = pf::make_unique<re::addon_filter<i_test::test_addon>>(addon_filter_mock);
    inst->register_addon_filter(std::string(), re::prio_test, std::move(filter));
-   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 1);
-   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 0);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 1ul);
+   EXPECT_EQ(inst->unregister_addon_filters(std::string(), typeid(i_test::test_addon)), 0ul);
 }
 
 TEST_F(reactor, factory_result)
