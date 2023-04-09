@@ -15,6 +15,7 @@
 #ifndef __IWS_REACTOR_R_HPP__
 #define __IWS_REACTOR_R_HPP__
 
+#include <cstdlib>
 #include <atomic>
 
 #include <reactor/reactor_dll.hpp>
