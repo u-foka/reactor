@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 if(NOT DEFINED BENCHMARK_INCLUDE_DIR)
    find_path(BENCHMARK_INCLUDE_DIR benchmark/benchmark.h)

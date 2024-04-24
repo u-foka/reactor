@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 macro(forward_to_parent vars)
    foreach(_i ${vars})

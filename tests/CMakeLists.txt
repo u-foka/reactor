@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 

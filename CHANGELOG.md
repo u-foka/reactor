@@ -6,15 +6,20 @@ Reactor Changelog
 - [F] Bufgix
 - [D] New deprecated API
 
+v2.6-next
+---------
+- [F] Fix missing include (cstdlib for size_t)
+- __[B]__ Require cmake 3.5 to avoid deprecation warnings 
+
 v2.6
------------
+----
 - [F] Fix build on newer clang
 - __[B]__ Fix addon ambiguity in addon and addon filter unregistration. This breaks the existing addon handling interface.
 - [F] Fix building shared library on windows
 - Make reactors read functions const
 
 v2.5
------------
+----
 - __[B]__ In addons, the required `interface` member is renamed to `intf` and `get_interface_type()` functions are
   renamed to `get_intf_type()`. This change was necessary to resolve a conflict with a macro `interface` defined in
   `combaseapi.h` from Microsoft. Thanks M$... very well done :(

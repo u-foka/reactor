@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 file(GLOB TEST_SOURCES *.cpp)
 file(GLOB TEST_HEADERS *.hpp)
